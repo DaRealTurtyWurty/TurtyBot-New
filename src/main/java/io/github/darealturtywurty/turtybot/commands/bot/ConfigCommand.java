@@ -11,7 +11,6 @@ import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
 import io.github.darealturtywurty.turtybot.util.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class ConfigCommand implements IGuildCommand {
@@ -104,36 +103,57 @@ public class ConfigCommand implements IGuildCommand {
 	private void handleSetConfig(Guild guild, String key, String value, Consumer<String> callback) {
 		switch (key.toLowerCase()) {
 		case "mod_role":
-			Role role = guild.getRoleById(value);
+			var role = guild.getRoleById(value);
 			if (role == null) {
 				callback.accept("You must provide a valid role id!");
 				break;
 			}
 			BotUtils.setModRoleForGuild(guild, role.getIdLong());
-			callback.accept("Set moderator role to: " + role.getAsMention());
+			callback.accept("Set Moderator Role to: " + role.getAsMention());
 			break;
 		case "mod_log":
 			String channelID = value.replace("<", "").replace("#", "").replace("!", "").replace(">", "");
-			TextChannel channel = guild.getTextChannelById(channelID);
+			var channel = guild.getTextChannelById(channelID);
 			if (channel == null) {
 				callback.accept("You must provide a valid channel mention!");
 				break;
 			}
 			BotUtils.setModLogForGuild(guild, channel.getIdLong());
-			callback.accept("Set mod log channel to: " + channel.getAsMention());
+			callback.accept("Set Moderation Logging Channel to: " + channel.getAsMention());
 			break;
 		case "adv_modder_role":
-			Role role1 = guild.getRoleById(value);
+			var role1 = guild.getRoleById(value);
 			if (role1 == null) {
 				callback.accept("You must provide a valid role id!");
 				break;
 			}
 			BotUtils.setAdvModderRoleForGuild(guild, role1.getIdLong());
-			callback.accept("Set Advanced Modder role to: " + role1.getAsMention());
+			callback.accept("Set Advanced Modder Role to: " + role1.getAsMention());
 			break;
 		case "prefix":
 			BotUtils.setPrefixForGuild(guild, value);
 			callback.accept("Set guild prefix to: " + value);
+			break;
+		case "muted_role":
+			var role2 = guild.getRoleById(value);
+			if (role2 == null) {
+				callback.accept("You must provide a valid role id!");
+				break;
+			}
+			BotUtils.setMutedRoleForGuild(guild, role2.getIdLong());
+			callback.accept("Set Muted Role to: " + role2.getAsMention());
+			break;
+		case "mute_threshold":
+			BotUtils.setMuteThreshold(guild, Integer.parseInt(value));
+			callback.accept("Set Mute Threshold to: " + value);
+			break;
+		case "kick_threshold":
+			BotUtils.setKickThreshold(guild, Integer.parseInt(value));
+			callback.accept("Set Kick Threshold to: " + value);
+			break;
+		case "ban_threshold":
+			BotUtils.setBanThreshold(guild, Integer.parseInt(value));
+			callback.accept("Set Ban Threshold to: " + value);
 			break;
 		default:
 			callback.accept(format("You must specify a valid option to configure! For more information, use `%sconfig`!",
@@ -145,31 +165,48 @@ public class ConfigCommand implements IGuildCommand {
 	private void handleGetConfig(Guild guild, String key, Consumer<String> callback) {
 		switch (key) {
 		case "mod_role":
-			Role role = BotUtils.getModeratorRole(guild);
+			var role = BotUtils.getModeratorRole(guild);
 			if (role == null) {
-				callback.accept("This guild has no moderator role!");
+				callback.accept("This guild has no Moderator Role!");
 				break;
 			}
-			callback.accept("The moderator role for this guild is: " + role.getAsMention());
+			callback.accept("The Moderator Role for this guild is: " + role.getAsMention());
 			break;
 		case "mod_log":
 			TextChannel channel = BotUtils.getModLogChannel(guild);
 			if (channel == null) {
-				callback.accept("This guild has no moderator logging channel!");
+				callback.accept("This guild has no Moderation Logging Channel!");
 				break;
 			}
-			callback.accept("The moderator logging channel for this guild is: " + channel.getAsMention());
+			callback.accept("The Moderation Logging Channel for this guild is: " + channel.getAsMention());
 			break;
 		case "adv_modder_role":
-			Role role1 = BotUtils.getAdvModderRole(guild);
+			var role1 = BotUtils.getAdvModderRole(guild);
 			if (role1 == null) {
-				callback.accept("This guild has no moderator role!");
+				callback.accept("This guild has no Advanced Modder Role!");
 				break;
 			}
-			callback.accept("The moderator role for this guild is: " + role1.getAsMention());
+			callback.accept("The Advanced Modder Role for this guild is: " + role1.getAsMention());
 			break;
 		case "prefix":
-			callback.accept("The prefix for this guild is: " + BotUtils.getPrefixFromGuild(guild));
+			callback.accept("The Prefix for this guild is: " + BotUtils.getPrefixFromGuild(guild));
+			break;
+		case "muted_role":
+			var role2 = BotUtils.getMutedRole(guild);
+			if (role2 == null) {
+				callback.accept("This guild has no Muted Role!");
+				break;
+			}
+			callback.accept("The Muted Role for this guild is: " + role2.getAsMention());
+			break;
+		case "mute_threshold":
+			callback.accept("The Mute Threshold for this guild is: " + BotUtils.getMuteThreshold(guild));
+			break;
+		case "kick_threshold":
+			callback.accept("The Kick Threshold for this guild is: " + BotUtils.getKickThreshold(guild));
+			break;
+		case "ban_threshold":
+			callback.accept("The Ban Threshold for this guild is: " + BotUtils.getBanThreshold(guild));
 			break;
 		default:
 			callback.accept(format("You must specify a valid option to get! For more information, use `%sconfig`!",
