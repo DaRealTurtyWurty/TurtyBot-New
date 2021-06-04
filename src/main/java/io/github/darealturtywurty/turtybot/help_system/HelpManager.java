@@ -12,7 +12,6 @@ import io.github.darealturtywurty.turtybot.util.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -23,6 +22,7 @@ import net.dv8tion.jda.internal.utils.tuple.Pair;
 public final class HelpManager {
 
 	private HelpManager() {
+		throw new IllegalAccessError("Attempted to construct Utility Class!");
 	}
 
 	protected static final Set<Map<Long, Long>> CHANNEL_SET = new HashSet<>();
@@ -55,8 +55,8 @@ public final class HelpManager {
 	}
 
 	protected static void createChannel(Guild guild, User user, String description) {
-		boolean complete = false;
-		int index = 0;
+		var complete = false;
+		var index = 0;
 		for (Map<Long, Long> userChannelMap : CHANNEL_SET) {
 			if (userChannelMap.containsKey(user.getIdLong())
 					&& !guild.getTextChannelsByName(user.getName() + "-" + user.getDiscriminator(), true).isEmpty()) {
@@ -121,7 +121,7 @@ public final class HelpManager {
 	protected static void postProblem(Guild guild, long channelID, HelpData details) {
 		List<TextChannel> channels = guild.getTextChannelsByName("current-problems", true);
 		TextChannel channel = channels.isEmpty() ? BotUtils.getModLogChannel(guild) : channels.get(0);
-		Member owner = guild.getMemberById(details.getOwner());
+		var owner = guild.getMemberById(details.getOwner());
 		String messageID = guild.getTextChannelById(channelID).getLatestMessageId();
 		var embed = new EmbedBuilder();
 		embed.setTitle(owner.getEffectiveName() + " | " + details.getTitle());
@@ -176,8 +176,8 @@ public final class HelpManager {
 		@Override
 		public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 			TextChannel channel = event.getChannel();
-			long channelID = channel.getIdLong();
-			Message message = event.getMessage();
+			var channelID = channel.getIdLong();
+			var message = event.getMessage();
 
 			if (!channel.getParent().getName().contains(SUPPORT) || event.getAuthor().isBot() || event.isWebhookMessage()
 					|| !CHANNEL_STAGE_MAP.containsKey(channelID))
@@ -188,7 +188,7 @@ public final class HelpManager {
 				return;
 
 			Pair<HelpData, Integer> data = CHANNEL_STAGE_MAP.get(channelID);
-			HelpData helpData = data.getLeft();
+			var helpData = data.getLeft();
 
 			switch (data.getRight()) {
 			case 0:
