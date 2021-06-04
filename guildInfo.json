@@ -4,6 +4,27 @@
     "Prefix": "!",
     "ModeratorRoleID": 820450911594872902,
     "ModLogChannelID": 820451030684008499,
-    "AdvancedModderRoleID": 835892413113434132
+    "AdvancedModderRoleID": 0,
+    "MutedRoleID": 849376284085190746,
+    "MuteThreshold": 2,
+    "KickThreshold": 3,
+    "BanThreshold": 5,
+    "UserWarns": [
+      {
+        "ID": 309776610255437824,
+        "Warns": []
+      },
+      {
+        "ID": 411601775078932491,
+        "Warns": [
+          {
+            "UUID": "fa3626a2-bbe9-4159-aa34-cd59dda45b12",
+            "Warner": 309776610255437824,
+            "Date": "02/06/2021, 22:01",
+            "Reason": "wide"
+          }
+        ]
+      }
+    ]
   }
 ]
