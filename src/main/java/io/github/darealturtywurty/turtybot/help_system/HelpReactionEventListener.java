@@ -5,6 +5,7 @@ import static io.github.darealturtywurty.turtybot.help_system.HelpManager.remove
 
 import io.github.darealturtywurty.turtybot.util.BotUtils;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
@@ -48,8 +49,7 @@ public class HelpReactionEventListener extends ListenerAdapter {
 			break;
 		case "❌":
 			if (event.getMessageIdLong() != this.messageID || !this.helpChannel.equals(event.getChannel())
-					&& (!BotUtils.isModerator(event.getGuild(), event.getUser())
-							|| !this.helpChannel.getTopic().split("\n")[0].equalsIgnoreCase(event.getUser().getId())))
+					&& shouldIgnoreMember(event.getChannel(), event.getMember()))
 				return;
 			event.getChannel().deleteMessageById(messageID).queue();
 			event.getJDA().removeEventListener(this);
@@ -60,14 +60,23 @@ public class HelpReactionEventListener extends ListenerAdapter {
 		}
 	}
 
+	protected static boolean shouldIgnoreMember(TextChannel channel, Member member) {
+		var advancedModder = BotUtils.getAdvModderRole(channel.getGuild());
+		return BotUtils.isModerator(channel.getGuild(), member)
+				|| channel.getTopic().split("\n")[0].toLowerCase().trim().equalsIgnoreCase(member.getId())
+				|| member.getRoles().contains(advancedModder) || member.getUser().isBot() || member.isPending();
+	}
+
 	@Override
 	public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
 		event.retrieveUser().queue(user -> {
 			if (event.getMessageIdLong() != this.messageID || !event.getReactionEmote().getEmoji().equalsIgnoreCase("🦺")
-					|| user.isBot() || this.helpChannel == null)
+					|| this.helpChannel == null)
 				return;
-			event.retrieveMember().queue(
-					member -> this.helpChannel.upsertPermissionOverride(member).setDeny(Permission.VIEW_CHANNEL).queue());
+			event.retrieveMember().queue(member -> {
+				if (!shouldIgnoreMember(event.getChannel(), event.getMember()))
+					this.helpChannel.upsertPermissionOverride(member).setDeny(Permission.VIEW_CHANNEL).queue();
+			});
 		});
 	}
 }

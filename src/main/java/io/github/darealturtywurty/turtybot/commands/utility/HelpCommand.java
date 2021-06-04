@@ -39,17 +39,17 @@ public class HelpCommand implements IGuildCommand {
 		List<String> channels = new ArrayList<>();
 		String channelStr;
 		if (command.validChannels().getLeft()) {
-			command.validChannels().getRight().stream().map(channel -> {
-				return ctx.getGuild().getTextChannelsByName(channel, true).stream().map(TextChannel::getAsMention)
-						.collect(Collectors.toList());
-			}).collect(Collectors.toList()).forEach(channelList -> channels.addAll(channelList));
+			command.validChannels().getRight().stream()
+					.map(channel -> ctx.getGuild().getTextChannelsByName(channel, true).stream()
+							.map(TextChannel::getAsMention).collect(Collectors.toList()))
+					.collect(Collectors.toList()).forEach(channels::addAll);
 			channelStr = String.join(", ", channels);
 			channelStr = channelStr.isEmpty() ? "This command cannot be used in any channel!" : channelStr;
 		} else {
 			channelStr = "This command can be used in any channel!";
 		}
 
-		EmbedBuilder embed = new EmbedBuilder();
+		var embed = new EmbedBuilder();
 		embed.setTitle("Information about command: " + command.getName());
 		embed.setDescription(command.getDescription());
 		embed.addField("Aliases: ", command.getAliases().isEmpty() ? "There are no aliases for this command!"

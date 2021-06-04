@@ -20,7 +20,7 @@ public class InternetRuleCommand implements IGuildCommand {
 	public InternetRuleCommand() {
 		InputStream stream = TurtyBot.class.getResourceAsStream("/rules_of_the_internet.txt");
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+			var reader = new BufferedReader(new InputStreamReader(stream));
 			if (reader.ready()) {
 				reader.lines().forEach(RULES::add);
 			}
@@ -32,7 +32,7 @@ public class InternetRuleCommand implements IGuildCommand {
 	@Override
 	public void handle(CommandContext ctx) {
 		TextChannel channel = ctx.getChannel();
-		boolean noNumber = false;
+		var noNumber = false;
 		if (ctx.getArgs().length < 1) {
 			noNumber = true;
 		} else {
@@ -43,13 +43,6 @@ public class InternetRuleCommand implements IGuildCommand {
 				noNumber = true;
 			}
 		}
-
-		/*
-		 * if (noNumber) { String rules = String.join("\n", RULES); while
-		 * (rules.length() + 11 > 2000) { String[] ruleArray = rules.split("\n"); rules
-		 * = rules.replace(ruleArray[ruleArray.length], ""); }
-		 * channel.sendMessage("```txt\n" + rules + "```").queue(); }
-		 */
 
 		if (!noNumber && RULES.size() > Integer.parseInt(ctx.getArgs()[0])) {
 			channel.sendMessage(RULES.get(Integer.parseInt(ctx.getArgs()[0]) - 1)).queue();

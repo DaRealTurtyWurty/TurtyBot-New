@@ -44,7 +44,7 @@ public class SolutionsCommand implements IGuildCommand {
 		if (ctx.getArgs().length >= 1) {
 			String solutionStr = ctx.getArgs()[0];
 			if (this.solutions.containsKey(solutionStr)) {
-				Solution solution = this.solutions.get(solutionStr);
+				var solution = this.solutions.get(solutionStr);
 				if (solution.shouldDM) {
 					ctx.getAuthor().openPrivateChannel().queue(channel -> {
 						if (solution.message.isLeft())
@@ -66,7 +66,6 @@ public class SolutionsCommand implements IGuildCommand {
 							reply.delete().queueAfter(5, TimeUnit.MINUTES);
 							ctx.getMessage().delete().queueAfter(5, TimeUnit.MINUTES);
 						});
-				return;
 			} else {
 				ctx.getChannel()
 						.sendMessage(
@@ -77,10 +76,8 @@ public class SolutionsCommand implements IGuildCommand {
 			return;
 		}
 
-		EmbedBuilder embed = new EmbedBuilder();
-		embed.setTitle("List of available solutions:");
-		embed.setDescription("`" + join("`, `", this.solutions.keySet()) + "`");
-		embed.setColor(Color.CYAN);
+		var embed = new EmbedBuilder().setTitle("List of available solutions:")
+				.setDescription("`" + join("`, `", this.solutions.keySet()) + "`").setColor(Color.CYAN);
 		ctx.getMessage().reply(embed.build()).mentionRepliedUser(false).queue(reply -> {
 			reply.delete().queueAfter(45, TimeUnit.SECONDS);
 			ctx.getMessage().delete().queueAfter(45, TimeUnit.SECONDS);
@@ -113,8 +110,7 @@ public class SolutionsCommand implements IGuildCommand {
 		return Either.right(new EmbedBuilder().setTitle("(Eclipse) 'Open Project' has encountered a problem.")
 				.setDescription(
 						"If you recieve the following error, this usually means you are either missing the .project' file, or it is corrupted. To fix this you can use the `<bot_prefix>setup eclipse` command. This will give you the command that you need to run in Command Prompt at the root of your mod folder.")
-				.setImage("https://i.postimg.cc/G2xgLsHX/124.jpg").setColor(BotUtils.generateRandomColor())
-				.build());
+				.setImage("https://i.postimg.cc/G2xgLsHX/124.jpg").setColor(BotUtils.generateRandomColor()).build());
 	}
 
 	public Either<String, MessageEmbed> getDatagen() {
@@ -228,8 +224,8 @@ public class SolutionsCommand implements IGuildCommand {
 	// transparency_extended
 	// transparency_extension
 	public Either<String, MessageEmbed> getTransparencyLong() {
-		return Either.right(new EmbedBuilder().setTitle("A fully detailed explaination on transparency").setDescription(
-				"Note: This is all made for mcp, not mojmap.")
+		return Either.right(new EmbedBuilder().setTitle("A fully detailed explaination on transparency")
+				.setDescription("Note: This is all made for mcp, not mojmap.")
 				.setImage("https://i.postimg.cc/1tQ0NPNw/image.png").setColor(0xF2F2F2).build());
 	}
 

@@ -14,7 +14,7 @@ public class RequestHelpCommand implements IGuildCommand {
 
 	@Override
 	public void handle(CommandContext ctx) {
-		String title = String.join(" ", ctx.getArgs());
+		var title = String.join(" ", ctx.getArgs());
 		if (title.isBlank()) {
 			ctx.getAuthor().openPrivateChannel().queue(
 					channel -> channel.sendMessage("You must provide the main title of your question!\n\nFor example: "
@@ -29,8 +29,8 @@ public class RequestHelpCommand implements IGuildCommand {
 			HelpManager.createChannel(ctx.getGuild(), ctx.getAuthor(), title);
 			ctx.getMessage().delete().queue();
 
-			final Timer timer = new Timer();
-			final TimerTask timerTask = new TimerTask() {
+			final var timer = new Timer();
+			final var timerTask = new TimerTask() {
 				@Override
 				public void run() {
 					TextChannel channel = ctx.getGuild().getTextChannelsByName(
