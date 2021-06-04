@@ -13,18 +13,28 @@ import io.github.darealturtywurty.turtybot.commands.bot.ConfigCommand;
 import io.github.darealturtywurty.turtybot.commands.bot.PingCommand;
 import io.github.darealturtywurty.turtybot.commands.bot.RestartCommand;
 import io.github.darealturtywurty.turtybot.commands.bot.ShutdownCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.AdviceCommand;
 import io.github.darealturtywurty.turtybot.commands.fun.InternetRuleCommand;
+import io.github.darealturtywurty.turtybot.commands.minecraft.MojangStatusCommand;
+import io.github.darealturtywurty.turtybot.commands.minecraft.UserUUIDCommand;
 import io.github.darealturtywurty.turtybot.commands.moderation.BanCommand;
+import io.github.darealturtywurty.turtybot.commands.moderation.ClearCommand;
+import io.github.darealturtywurty.turtybot.commands.moderation.ClearWarnsCommand;
+import io.github.darealturtywurty.turtybot.commands.moderation.KickCommand;
+import io.github.darealturtywurty.turtybot.commands.moderation.MuteCommand;
+import io.github.darealturtywurty.turtybot.commands.moderation.RemoveWarnCommand;
+import io.github.darealturtywurty.turtybot.commands.moderation.UnbanCommand;
+import io.github.darealturtywurty.turtybot.commands.moderation.UnmuteCommand;
+import io.github.darealturtywurty.turtybot.commands.moderation.WarnCommand;
+import io.github.darealturtywurty.turtybot.commands.moderation.WarningsCommand;
+import io.github.darealturtywurty.turtybot.commands.utility.BotInfoCommand;
 import io.github.darealturtywurty.turtybot.commands.utility.CommandListCommand;
 import io.github.darealturtywurty.turtybot.commands.utility.HelpCommand;
+import io.github.darealturtywurty.turtybot.commands.utility.RolesCommand;
 import io.github.darealturtywurty.turtybot.commands.utility.SolutionsCommand;
 import io.github.darealturtywurty.turtybot.help_system.CloseChannelCommand;
 import io.github.darealturtywurty.turtybot.help_system.RequestHelpCommand;
 import io.github.darealturtywurty.turtybot.util.BotUtils;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandManager {
@@ -38,11 +48,27 @@ public class CommandManager {
 		this.addCommand(new RestartCommand());
 		this.addCommand(new ConfigCommand());
 		this.addCommand(new SolutionsCommand());
+
 		this.addCommand(new RequestHelpCommand());
 		this.addCommand(new CloseChannelCommand());
+
 		this.addCommand(new PutinCommand());
-		this.addCommand(new BanCommand());
 		this.addCommand(new InternetRuleCommand());
+		this.addCommand(new AdviceCommand());
+		this.addCommand(new BotInfoCommand());
+		this.addCommand(new RolesCommand());
+		this.addCommand(new MojangStatusCommand());
+		this.addCommand(new UserUUIDCommand());
+		this.addCommand(new BanCommand());
+		this.addCommand(new KickCommand());
+		this.addCommand(new MuteCommand());
+		this.addCommand(new UnmuteCommand());
+		this.addCommand(new UnbanCommand());
+		this.addCommand(new WarnCommand());
+		this.addCommand(new RemoveWarnCommand());
+		this.addCommand(new ClearWarnsCommand());
+		this.addCommand(new WarningsCommand());
+		this.addCommand(new ClearCommand());
 	}
 
 	public void addCommand(IGuildCommand cmd) {
@@ -70,10 +96,10 @@ public class CommandManager {
 	}
 
 	public void handle(GuildMessageReceivedEvent event) {
-		User user = event.getAuthor();
-		TextChannel channel = event.getChannel();
-		Message message = event.getMessage();
-		Guild guild = event.getGuild();
+		var user = event.getAuthor();
+		var channel = event.getChannel();
+		var message = event.getMessage();
+		var guild = event.getGuild();
 
 		String prefix = BotUtils.getPrefixFromGuild(guild);
 		String[] split = message.getContentRaw().replaceFirst("(?i)" + Pattern.quote(prefix), "").split("\\s+");
@@ -90,9 +116,8 @@ public class CommandManager {
 								|| cmd.validChannels().getRight().contains(channel.getName().toLowerCase()))
 								&& (!cmd.validCategories().getLeft() || cmd.validCategories().getRight()
 										.contains(channel.getParent().getName().toLowerCase()))) {
-							// channel.sendTyping().queue();
 							List<String> args = Arrays.asList(split).subList(1, split.length);
-							CommandContext ctx = new CommandContext(event, args.toArray(new String[0]));
+							var ctx = new CommandContext(event, args.toArray(new String[0]));
 							cmd.handle(ctx);
 							return;
 						}
@@ -125,6 +150,5 @@ public class CommandManager {
 					message.delete().queueAfter(15, TimeUnit.SECONDS);
 					reply.delete().queueAfter(15, TimeUnit.SECONDS);
 				});
-		return;
 	}
 }
