@@ -2,6 +2,7 @@ package io.github.darealturtywurty.turtybot.commands.utility;
 
 import java.util.List;
 
+import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
 import net.dv8tion.jda.api.entities.Guild;
@@ -9,14 +10,13 @@ import net.dv8tion.jda.api.entities.Role;
 
 public class RolesCommand implements IGuildCommand {
 
-	@Override
-	public void handle(CommandContext ctx) {
-		ctx.getMessage().reply("```" + getRoles(ctx.getGuild()) + "```").mentionRepliedUser(false).queue();
+	public static String padRight(final String s, final int n) {
+		return String.format("%-" + n + "s", s);
 	}
 
 	@Override
-	public String getName() {
-		return "roles";
+	public CommandCategory getCategory() {
+		return CommandCategory.UTILITY;
 	}
 
 	@Override
@@ -24,9 +24,14 @@ public class RolesCommand implements IGuildCommand {
 		return "Gets all the roles in the current guild";
 	}
 
-	private String getRoles(Guild guild) {
-		var strBuilder = new StringBuilder();
-		List<Role> roles = guild.getRoles();
+	@Override
+	public String getName() {
+		return "roles";
+	}
+
+	private String getRoles(final Guild guild) {
+		final var strBuilder = new StringBuilder();
+		final List<Role> roles = guild.getRoles();
 		for (var index = 0; index < roles.size(); index++) {
 			strBuilder.append(padRight(roles.get(index).getName().replace("@everyone", "Members with no role") + ":", 25)
 					+ guild.getMembersWithRoles(roles.get(index)).size() + "\n");
@@ -34,7 +39,8 @@ public class RolesCommand implements IGuildCommand {
 		return strBuilder.toString();
 	}
 
-	public static String padRight(String s, int n) {
-		return String.format("%-" + n + "s", s);
+	@Override
+	public void handle(final CommandContext ctx) {
+		ctx.getMessage().reply("```" + getRoles(ctx.getGuild()) + "```").mentionRepliedUser(false).queue();
 	}
 }

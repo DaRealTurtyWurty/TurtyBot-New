@@ -16,7 +16,7 @@ public class ShowcaseInfo {
 		else
 			this.stars = stars;
 	}
-	
+
 	public int getStars() {
 		return this.stars;
 	}

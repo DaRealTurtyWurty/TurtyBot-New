@@ -3,6 +3,7 @@ package io.github.darealturtywurty.turtybot.commands.utility;
 import java.awt.Color;
 import java.util.List;
 
+import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
 import io.github.darealturtywurty.turtybot.util.Constants;
@@ -14,14 +15,17 @@ import net.dv8tion.jda.api.entities.Role;
 
 public class BotInfoCommand implements IGuildCommand {
 
-	@Override
-	public void handle(CommandContext ctx) {
-		sendInfo(ctx.getJDA(), ctx.getGuild(), ctx.getMessage());
+	public Color chooseColor() {
+		// Pastel Colors
+		final var hue = Constants.RANDOM.nextFloat();
+		final var saturation = 0.9f; // 1.0f for brilliant, 0.0f for dull
+		final var luminance = 1.0f; // 1.0f for brighter, 0.0f for black
+		return Color.getHSBColor(hue, saturation, luminance);
 	}
 
 	@Override
-	public String getName() {
-		return "botinfo";
+	public CommandCategory getCategory() {
+		return CommandCategory.UTILITY;
 	}
 
 	@Override
@@ -29,8 +33,33 @@ public class BotInfoCommand implements IGuildCommand {
 		return "Gets information about the bot.";
 	}
 
-	public void sendInfo(JDA jda, Guild guild, Message message) {
-		var builder = new EmbedBuilder();
+	@Override
+	public String getName() {
+		return "botinfo";
+	}
+
+	public String getRoles(final List<Role> roleList) {
+		final var roles = new StringBuilder();
+		if (!roleList.isEmpty()) {
+			var tempRole = roleList.get(0);
+			roles.append(tempRole.getAsMention());
+			for (var index = 1; index < roleList.size(); index++) {
+				tempRole = roleList.get(index);
+				roles.append(", " + tempRole.getAsMention());
+			}
+		} else {
+			roles.append("None");
+		}
+		return roles.toString();
+	}
+
+	@Override
+	public void handle(final CommandContext ctx) {
+		sendInfo(ctx.getJDA(), ctx.getGuild(), ctx.getMessage());
+	}
+
+	public void sendInfo(final JDA jda, final Guild guild, final Message message) {
+		final var builder = new EmbedBuilder();
 		builder.setTitle("Bot Info");
 		builder.setColor(chooseColor());
 		builder.setDescription("Information about TurtyBot.");
@@ -50,34 +79,11 @@ public class BotInfoCommand implements IGuildCommand {
 		builder.addField("Bulk Delete Splitting?", Boolean.toString(jda.isBulkDeleteSplittingEnabled()), true);
 		builder.addField("Account Type:", jda.getAccountType().toString(), true);
 
-		var strBuilder = new StringBuilder();
-		for (Guild mutualGuild : jda.getMutualGuilds()) {
+		final var strBuilder = new StringBuilder();
+		for (final Guild mutualGuild : jda.getMutualGuilds()) {
 			strBuilder.append(mutualGuild.getName() + ", ");
 		}
 		builder.addField("Mutual Guilds: ", strBuilder.toString().substring(0, strBuilder.toString().length() - 2), false);
-		message.reply(builder.build()).mentionRepliedUser(false).queue();
-	}
-
-	public Color chooseColor() {
-		// Pastel Colors
-		final var hue = Constants.RANDOM.nextFloat();
-		final var saturation = 0.9f; // 1.0f for brilliant, 0.0f for dull
-		final var luminance = 1.0f; // 1.0f for brighter, 0.0f for black
-		return Color.getHSBColor(hue, saturation, luminance);
-	}
-
-	public String getRoles(List<Role> roleList) {
-		var roles = new StringBuilder();
-		if (!roleList.isEmpty()) {
-			var tempRole = roleList.get(0);
-			roles.append(tempRole.getAsMention());
-			for (var index = 1; index < roleList.size(); index++) {
-				tempRole = roleList.get(index);
-				roles.append(", " + tempRole.getAsMention());
-			}
-		} else {
-			roles.append("None");
-		}
-		return roles.toString();
+		message.replyEmbeds(builder.build()).mentionRepliedUser(false).queue();
 	}
 }

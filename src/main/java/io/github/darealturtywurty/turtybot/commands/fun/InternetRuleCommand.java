@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import io.github.darealturtywurty.turtybot.TurtyBot;
+import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
 import io.github.darealturtywurty.turtybot.util.Constants;
@@ -18,20 +19,35 @@ public class InternetRuleCommand implements IGuildCommand {
 	protected static final List<String> RULES = new ArrayList<>();
 
 	public InternetRuleCommand() {
-		InputStream stream = TurtyBot.class.getResourceAsStream("/rules_of_the_internet.txt");
+		final InputStream stream = TurtyBot.class.getResourceAsStream("/rules_of_the_internet.txt");
 		try {
-			var reader = new BufferedReader(new InputStreamReader(stream));
+			final var reader = new BufferedReader(new InputStreamReader(stream));
 			if (reader.ready()) {
 				reader.lines().forEach(RULES::add);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			Constants.LOGGER.log(Level.WARNING, "There has been an issue parsing file: {0}", stream);
 		}
 	}
 
 	@Override
-	public void handle(CommandContext ctx) {
-		TextChannel channel = ctx.getChannel();
+	public CommandCategory getCategory() {
+		return CommandCategory.FUN;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Gets a rule from The Rules of The Internet.";
+	}
+
+	@Override
+	public String getName() {
+		return "erule";
+	}
+
+	@Override
+	public void handle(final CommandContext ctx) {
+		final TextChannel channel = ctx.getChannel();
 		var noNumber = false;
 		if (ctx.getArgs().length < 1) {
 			noNumber = true;
@@ -39,7 +55,7 @@ public class InternetRuleCommand implements IGuildCommand {
 			try {
 				Integer.parseInt(ctx.getArgs()[0]);
 				noNumber = false;
-			} catch (NumberFormatException e) {
+			} catch (final NumberFormatException e) {
 				noNumber = true;
 			}
 		}
@@ -51,15 +67,5 @@ public class InternetRuleCommand implements IGuildCommand {
 		}
 
 		ctx.getMessage().delete().queue();
-	}
-
-	@Override
-	public String getName() {
-		return "erule";
-	}
-
-	@Override
-	public String getDescription() {
-		return "Gets a rule from The Rules of The Internet.";
 	}
 }

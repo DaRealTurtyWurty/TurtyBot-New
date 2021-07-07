@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
+import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
 import io.github.darealturtywurty.turtybot.util.BotUtils.WarnUtils;
@@ -14,21 +15,41 @@ import net.dv8tion.jda.api.entities.Member;
 public class WarningsCommand implements IGuildCommand {
 
 	@Override
-	public void handle(CommandContext ctx) {
-		var message = ctx.getMessage();
-		var guild = ctx.getGuild();
+	public List<String> getAliases() {
+		return Arrays.asList("history", "warns", "warnhistory", "allwarns");
+	}
+
+	@Override
+	public CommandCategory getCategory() {
+		return CommandCategory.MODERATION;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Lists all the warnings for a user.";
+	}
+
+	@Override
+	public String getName() {
+		return "warnings";
+	}
+
+	@Override
+	public void handle(final CommandContext ctx) {
+		final var message = ctx.getMessage();
+		final var guild = ctx.getGuild();
 		if (ctx.getArgs().length < 1) {
 			ctx.getMessage().reply("You must supply the user that you want to get warnings from.").mentionRepliedUser(false)
 					.queue();
 			return;
 		}
 
-		String toGetStr = ctx.getArgs()[0];
+		final String toGetStr = ctx.getArgs()[0];
 
 		Member toGet = null;
 		try {
 			toGet = message.getMentionedMembers().get(0);
-		} catch (IndexOutOfBoundsException ex) {
+		} catch (final IndexOutOfBoundsException ex) {
 			guild.retrieveMemberById(toGetStr).queue();
 			toGet = guild.getMemberById(toGetStr);
 		}
@@ -38,8 +59,8 @@ public class WarningsCommand implements IGuildCommand {
 			return;
 		}
 
-		var userWarns = WarnUtils.getUserWarns(guild, toGet);
-		var warnsEmbed = new EmbedBuilder().setColor(toGet.getColorRaw())
+		final var userWarns = WarnUtils.getUserWarns(guild, toGet);
+		final var warnsEmbed = new EmbedBuilder().setColor(toGet.getColorRaw())
 				.setTitle("Warnings for: " + toGet.getEffectiveName())
 				.setDescription(toGet.getEffectiveName() + " has " + userWarns.getNumberWarns() + " warnings!")
 				.setTimestamp(Instant.now());
@@ -49,22 +70,6 @@ public class WarningsCommand implements IGuildCommand {
 								+ Constants.DATE_FORMAT.format(warnInfo.middle) + "\n\n**Reason:**\n" + warnInfo.right,
 						false));
 
-		message.reply(warnsEmbed.build()).mentionRepliedUser(false).queue();
+		message.replyEmbeds(warnsEmbed.build()).mentionRepliedUser(false).queue();
 	}
-
-	@Override
-	public String getName() {
-		return "warnings";
-	}
-
-	@Override
-	public List<String> getAliases() {
-		return Arrays.asList("history", "warns", "warnhistory", "allwarns");
-	}
-
-	@Override
-	public String getDescription() {
-		return "Lists all the warnings for a user.";
-	}
-
 }

@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
+import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
 import io.github.darealturtywurty.turtybot.util.BotUtils;
@@ -16,8 +17,39 @@ import net.dv8tion.jda.api.entities.Message;
 
 public class KickCommand implements IGuildCommand {
 
+	public static void kickMember(final Guild guild, final Member kicker, final Member toKick,
+			@Nullable final Message toDelete, final String reason) {
+		final var kickEmbed = new EmbedBuilder().setColor(Color.RED).setTitle("You were kicked from: " + guild.getName())
+				.setDescription("**Reason**: " + reason + "\n**Kicked By**: " + kicker.getAsMention());
+		toKick.getUser().openPrivateChannel().queueAfter(5, TimeUnit.SECONDS,
+				channel -> channel.sendMessageEmbeds(kickEmbed.build()).queue(msg -> toKick.kick(reason).queue()));
+
+		final var kickLogEmbed = new EmbedBuilder().setColor(Color.RED).setTitle(toKick.getEffectiveName() + " was kicked!")
+				.setDescription("**Reason**: " + reason + "\n**Kicked By**: " + kicker.getAsMention());
+		BotUtils.getModLogChannel(guild).sendMessageEmbeds(kickLogEmbed.build()).queue();
+
+		if (toDelete != null) {
+			toDelete.delete().queue();
+		}
+	}
+
 	@Override
-	public void handle(CommandContext ctx) {
+	public CommandCategory getCategory() {
+		return CommandCategory.MODERATION;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Kicks a member from the guild.";
+	}
+
+	@Override
+	public String getName() {
+		return "kick";
+	}
+
+	@Override
+	public void handle(final CommandContext ctx) {
 		final var guild = ctx.getGuild();
 		final var message = ctx.getMessage();
 		final String strToKick = ctx.getArgs()[0];
@@ -26,7 +58,7 @@ public class KickCommand implements IGuildCommand {
 				Member toKick = null;
 				try {
 					toKick = message.getMentionedMembers().get(0);
-				} catch (IndexOutOfBoundsException ex) {
+				} catch (final IndexOutOfBoundsException ex) {
 					guild.retrieveMemberById(strToKick).queue();
 					toKick = guild.getMemberById(strToKick);
 				}
@@ -67,30 +99,6 @@ public class KickCommand implements IGuildCommand {
 			message.delete().queueAfter(15, TimeUnit.SECONDS);
 			reply.delete().queueAfter(15, TimeUnit.SECONDS);
 		});
-	}
-
-	public static void kickMember(Guild guild, Member kicker, Member toKick, @Nullable Message toDelete, String reason) {
-		final var kickEmbed = new EmbedBuilder().setColor(Color.RED).setTitle("You were kicked from: " + guild.getName())
-				.setDescription("**Reason**: " + reason + "\n**Kicked By**: " + kicker.getAsMention());
-		toKick.getUser().openPrivateChannel().queueAfter(5, TimeUnit.SECONDS,
-				channel -> channel.sendMessage(kickEmbed.build()).queue(msg -> toKick.kick(reason).queue()));
-
-		final var kickLogEmbed = new EmbedBuilder().setColor(Color.RED).setTitle(toKick.getEffectiveName() + " was kicked!")
-				.setDescription("**Reason**: " + reason + "\n**Kicked By**: " + kicker.getAsMention());
-		BotUtils.getModLogChannel(guild).sendMessage(kickLogEmbed.build()).queue();
-
-		if (toDelete != null)
-			toDelete.delete().queue();
-	}
-
-	@Override
-	public String getName() {
-		return "kick";
-	}
-
-	@Override
-	public String getDescription() {
-		return "Kicks a member from the guild.";
 	}
 
 	@Override

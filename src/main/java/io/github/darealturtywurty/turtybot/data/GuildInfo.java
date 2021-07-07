@@ -10,6 +10,7 @@ public class GuildInfo {
 	public final Guild guild;
 	public final Map<Long, UserWarns> userWarnMap = new HashMap<>();
 	public final Map<Long, ShowcaseInfo> showcaseInfos = new HashMap<>();
+	public final Map<Long, StarStats> userStarStats = new HashMap<>();
 
 	public String prefix = "!";
 

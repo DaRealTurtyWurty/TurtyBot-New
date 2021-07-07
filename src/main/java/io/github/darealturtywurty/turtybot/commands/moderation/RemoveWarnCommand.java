@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
 import io.github.darealturtywurty.turtybot.util.BotUtils.WarnUtils;
@@ -11,26 +12,13 @@ import io.github.darealturtywurty.turtybot.util.BotUtils.WarnUtils;
 public class RemoveWarnCommand implements IGuildCommand {
 
 	@Override
-	public void handle(CommandContext ctx) {
-		if (ctx.getArgs().length < 1) {
-			ctx.getMessage().reply("You must supply the UUID of the warn that you wish to remove!").mentionRepliedUser(false)
-					.queue();
-			return;
-		}
-
-		boolean complete = WarnUtils.removeWarnByUUID(ctx.getGuild(), ctx.getMember(), ctx.getArgs()[0]);
-		if (!complete)
-			ctx.getMessage().reply("You must provide a valid UUID.").mentionRepliedUser(false).queue(msg -> {
-				msg.delete().queueAfter(30, TimeUnit.SECONDS);
-				ctx.getMessage().delete().queueAfter(30, TimeUnit.SECONDS);
-			});
-		else
-			ctx.getMessage().delete().queue();
+	public List<String> getAliases() {
+		return Arrays.asList("delwarn", "deletewarn", "remwarn", "destroywarn");
 	}
 
 	@Override
-	public String getName() {
-		return "removewarn";
+	public CommandCategory getCategory() {
+		return CommandCategory.MODERATION;
 	}
 
 	@Override
@@ -39,8 +27,27 @@ public class RemoveWarnCommand implements IGuildCommand {
 	}
 
 	@Override
-	public List<String> getAliases() {
-		return Arrays.asList("delwarn", "deletewarn", "remwarn", "destroywarn");
+	public String getName() {
+		return "removewarn";
+	}
+
+	@Override
+	public void handle(final CommandContext ctx) {
+		if (ctx.getArgs().length < 1) {
+			ctx.getMessage().reply("You must supply the UUID of the warn that you wish to remove!").mentionRepliedUser(false)
+					.queue();
+			return;
+		}
+
+		final boolean complete = WarnUtils.removeWarnByUUID(ctx.getGuild(), ctx.getMember(), ctx.getArgs()[0]);
+		if (!complete) {
+			ctx.getMessage().reply("You must provide a valid UUID.").mentionRepliedUser(false).queue(msg -> {
+				msg.delete().queueAfter(30, TimeUnit.SECONDS);
+				ctx.getMessage().delete().queueAfter(30, TimeUnit.SECONDS);
+			});
+		} else {
+			ctx.getMessage().delete().queue();
+		}
 	}
 
 	@Override

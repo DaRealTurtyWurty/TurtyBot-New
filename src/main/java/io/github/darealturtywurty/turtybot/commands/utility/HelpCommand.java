@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.CommandManager;
 import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
@@ -23,20 +24,35 @@ public class HelpCommand implements IGuildCommand {
 	}
 
 	@Override
-	public void handle(CommandContext ctx) {
-		String prefix = BotUtils.getPrefixFromGuild(ctx.getGuild());
+	public CommandCategory getCategory() {
+		return CommandCategory.UTILITY;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Gets the information about the current command!";
+	}
+
+	@Override
+	public String getName() {
+		return "help";
+	}
+
+	@Override
+	public void handle(final CommandContext ctx) {
+		final String prefix = BotUtils.getPrefixFromGuild(ctx.getGuild());
 		if (ctx.getArgs().length <= 0) {
 			ctx.getChannel().sendMessage("To get a list of commands, use `" + prefix + "commands`.\n").queue();
 			return;
 		}
 
-		IGuildCommand command = this.commandManager.getCommand(ctx.getArgs()[0]);
+		final IGuildCommand command = this.commandManager.getCommand(ctx.getArgs()[0]);
 		if (command == null) {
 			ctx.getChannel().sendMessage("No command found for " + ctx.getArgs()[0]).queue();
 			return;
 		}
 
-		List<String> channels = new ArrayList<>();
+		final List<String> channels = new ArrayList<>();
 		String channelStr;
 		if (command.validChannels().getLeft()) {
 			command.validChannels().getRight().stream()
@@ -49,7 +65,7 @@ public class HelpCommand implements IGuildCommand {
 			channelStr = "This command can be used in any channel!";
 		}
 
-		var embed = new EmbedBuilder();
+		final var embed = new EmbedBuilder();
 		embed.setTitle("Information about command: " + command.getName());
 		embed.setDescription(command.getDescription());
 		embed.addField("Aliases: ", command.getAliases().isEmpty() ? "There are no aliases for this command!"
@@ -61,25 +77,15 @@ public class HelpCommand implements IGuildCommand {
 		embed.addField("Is server booster only?", BotUtils.trueFalseToYesNo(command.isBoosterOnly()), false);
 		embed.addField("Is developer mode only?", BotUtils.trueFalseToYesNo(command.isDevelopmentOnly()), false);
 		embed.addField("Should private message?", BotUtils.trueFalseToYesNo(command.shouldPrivateMessage()), false);
-		embed.setColor(BotUtils.generateRandomColor());
-		ctx.getMessage().reply(embed.build()).mentionRepliedUser(false).queue(msg -> {
+		embed.setColor(BotUtils.generateRandomPastelColor());
+		ctx.getMessage().replyEmbeds(embed.build()).mentionRepliedUser(false).queue(msg -> {
 			ctx.getMessage().delete().queueAfter(30, TimeUnit.SECONDS);
 			msg.delete().queueAfter(30, TimeUnit.SECONDS);
 		});
 	}
 
 	@Override
-	public String getName() {
-		return "help";
-	}
-
-	@Override
 	public Pair<Boolean, List<String>> validChannels() {
 		return Pair.of(true, Arrays.asList("bot-stuff"));
-	}
-
-	@Override
-	public String getDescription() {
-		return "Gets the information about the current command!";
 	}
 }

@@ -12,12 +12,12 @@ import com.google.gson.GsonBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import io.github.darealturtywurty.turtybot.managers.levelling_system.LevellingManager;
+
 public final class Constants {
 
-	private Constants() {
-	}
-
 	public static final long DEFAULT_OWNER_ID = 309776610255437824L;
+
 	public static final String USER_AGENT = "Mozilla/5.0 | TurtyBot#8108 | TurtyWurty#5690";
 	public static final Pattern URL_PATTERN = Pattern.compile(
 			"(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)" + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
@@ -25,7 +25,6 @@ public final class Constants {
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	public static final Config CONFIG = ConfigFactory.load();
-
 	public static final Logger LOGGER = Logger.getGlobal();
 
 	public static final DateFormat DATE_FORMAT = DateFormat.getInstance();
@@ -33,6 +32,12 @@ public final class Constants {
 	public static final Random RANDOM = new Random();
 
 	public static final Set<String> FILE_EXTENSIONS = new HashSet<>();
+
+	public static final double MILLI_TO_MONTH = 2.628e+9;
+
+	public static final LevellingManager LEVELLING_MANAGER = new LevellingManager();
+
+	public static final String BEAN_DUMPY_URL = "https://images-ext-2.discordapp.net/external/hFKX8jvrVZ_MobmGXB5IHiWCCejb8T-Q-so6T414k50/https/media.discordapp.net/attachments/855162784924434442/859517109725954048/dumpy.gif";
 
 	static {
 		FILE_EXTENSIONS.add("txt");
@@ -343,5 +348,8 @@ public final class Constants {
 		FILE_EXTENSIONS.add("mcmeta");
 		FILE_EXTENSIONS.add("env");
 		FILE_EXTENSIONS.add("ignore");
+	}
+
+	private Constants() {
 	}
 }

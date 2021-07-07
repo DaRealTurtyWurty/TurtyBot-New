@@ -2,29 +2,27 @@
   {
     "GuildID": 819294753732296776,
     "Prefix": "!",
-    "ModeratorRoleID": 820450911594872902,
+    "ModeratorRoleID": 0,
     "ModLogChannelID": 820451030684008499,
     "AdvancedModderRoleID": 0,
-    "MutedRoleID": 849376284085190746,
+    "MutedRoleID": 0,
     "MuteThreshold": 2,
     "KickThreshold": 3,
     "BanThreshold": 5,
-    "UserWarns": [
-      {
-        "ID": 309776610255437824,
-        "Warns": []
-      },
-      {
-        "ID": 411601775078932491,
-        "Warns": [
-          {
-            "UUID": "fa3626a2-bbe9-4159-aa34-cd59dda45b12",
-            "Warner": 309776610255437824,
-            "Date": "02/06/2021, 22:01",
-            "Reason": "wide"
-          }
-        ]
-      }
-    ]
+    "UserWarns": [],
+    "ShowcasesChannelID": 820454246923108352,
+    "StarboardChannelID": 0,
+    "MinimumStars": 5,
+    "ShouldIncludeBotStar": false,
+    "StarboardEnabled": true,
+    "StarboardStages": {
+      "Stage0": 10,
+      "Stage1": 50,
+      "Stage2": 50,
+      "Stage3": 50,
+      "Stage4": 50,
+      "Stage5": 50
+    },
+    "ShowcaseInfo": []
   }
 ]

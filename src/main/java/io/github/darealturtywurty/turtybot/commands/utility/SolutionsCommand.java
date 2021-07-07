@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
 import io.github.darealturtywurty.turtybot.util.BotUtils;
@@ -21,6 +22,32 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.internal.utils.tuple.Pair;
 
 public class SolutionsCommand implements IGuildCommand {
+
+	private static final class Solution {
+		public static Solution createSolution(final String name, final Either<String, MessageEmbed> message) {
+			return new Solution(name, message);
+		}
+
+		private boolean shouldDM = false;
+		private final Set<String> aliases = new HashSet<>();
+
+		private final Either<String, MessageEmbed> message;
+
+		private Solution(final String name, final Either<String, MessageEmbed> message) {
+			addAliases(name);
+			this.message = message;
+		}
+
+		public Solution addAliases(final String... aliases) {
+			this.aliases.addAll(Arrays.asList(aliases));
+			return this;
+		}
+
+		public Solution shouldDM() {
+			this.shouldDM = true;
+			return this;
+		}
+	}
 
 	private final Map<String, Solution> solutions = new HashMap<>();
 
@@ -35,58 +62,8 @@ public class SolutionsCommand implements IGuildCommand {
 		addSolution(Solution.createSolution("tooltip", getTooltip()).addAliases("tooltips"));
 	}
 
-	private void addSolution(Solution solution) {
+	private void addSolution(final Solution solution) {
 		solution.aliases.forEach(alias -> this.solutions.put(alias, solution));
-	}
-
-	@Override
-	public void handle(CommandContext ctx) {
-		if (ctx.getArgs().length >= 1) {
-			String solutionStr = ctx.getArgs()[0];
-			if (this.solutions.containsKey(solutionStr)) {
-				var solution = this.solutions.get(solutionStr);
-				if (solution.shouldDM) {
-					ctx.getAuthor().openPrivateChannel().queue(channel -> {
-						if (solution.message.isLeft())
-							channel.sendMessage(format("Message sent by: %s", ctx.getAuthor().getAsMention())
-									+ solution.message.getLeft()).queue();
-						else
-							channel.sendMessage(
-									new EmbedBuilder(solution.message.get()).setAuthor(
-											"Message sent by: " + ctx.getAuthor().getName() + "#"
-													+ ctx.getAuthor().getDiscriminator(),
-											null, ctx.getAuthor().getAvatarUrl()).build())
-									.queue();
-					});
-					ctx.getMessage().delete().queue();
-					return;
-				}
-				ctx.getMessage().reply(new EmbedBuilder(solution.message.get()).build()).mentionRepliedUser(false)
-						.queue(reply -> {
-							reply.delete().queueAfter(5, TimeUnit.MINUTES);
-							ctx.getMessage().delete().queueAfter(5, TimeUnit.MINUTES);
-						});
-			} else {
-				ctx.getChannel()
-						.sendMessage(
-								format("You must provide a valid solution! For the list of solutions, use `%ssolutions`.",
-										BotUtils.getPrefixFromGuild(ctx.getGuild())))
-						.queue();
-			}
-			return;
-		}
-
-		var embed = new EmbedBuilder().setTitle("List of available solutions:")
-				.setDescription("`" + join("`, `", this.solutions.keySet()) + "`").setColor(Color.CYAN);
-		ctx.getMessage().reply(embed.build()).mentionRepliedUser(false).queue(reply -> {
-			reply.delete().queueAfter(45, TimeUnit.SECONDS);
-			ctx.getMessage().delete().queueAfter(45, TimeUnit.SECONDS);
-		});
-	}
-
-	@Override
-	public String getName() {
-		return "solutions";
 	}
 
 	@Override
@@ -94,23 +71,27 @@ public class SolutionsCommand implements IGuildCommand {
 		return Arrays.asList("solution");
 	}
 
+	// place_block
+	// block_place
+	// ghost_block
+	public Either<String, MessageEmbed> getBlockPlace() {
+		return Either.right(new EmbedBuilder().setTitle("Ghost block when opening container with block in hand")
+				.setDescription("**When opening your container with a block in your hand, you experience an issue where it "
+						+ "places the block for a split second.**\n\n**How to fix:**\nYou can fix this issue by going into"
+						+ " your `onBlockActivated` method, and making sure you return the same action result every time. "
+						+ "You should always be returning `ActionResultType.SUCCESS` in this specific instance."
+						+ "\n\n**Why does this happen?**\nThe reason this is happening is because of the server side "
+						+ "check that you are doing to open the GUI. You are then retuning `SUCCESS` on the server "
+						+ "and `FAIL` on the client. This means that the client will try to use the held item, since it "
+						+ "is being told you were unable to complete the action. Whereas the server knows that you "
+						+ "succeded. This means the client will render the block, but only for a split second since "
+						+ "the server is denying the placement.")
+				.build());
+	}
+
 	@Override
-	public String getDescription() {
-		return "Gets the list of solutions, or if an argument is specified, "
-				+ "gets a solution by the argument name (if it exists).";
-	}
-
-	public Either<String, MessageEmbed> getFormattingCodes() {
-		return Either.right(new EmbedBuilder().setTitle("List of minecraft formatting codes!")
-				.setImage("https://media.discordapp.net/attachments/645695673668337692/645723908737073152/unknown_1.png")
-				.setColor(BotUtils.generateRandomColor()).build());
-	}
-
-	public Either<String, MessageEmbed> getMissingProject() {
-		return Either.right(new EmbedBuilder().setTitle("(Eclipse) 'Open Project' has encountered a problem.")
-				.setDescription(
-						"If you recieve the following error, this usually means you are either missing the .project' file, or it is corrupted. To fix this you can use the `<bot_prefix>setup eclipse` command. This will give you the command that you need to run in Command Prompt at the root of your mod folder.")
-				.setImage("https://i.postimg.cc/G2xgLsHX/124.jpg").setColor(BotUtils.generateRandomColor()).build());
+	public CommandCategory getCategory() {
+		return CommandCategory.UTILITY;
 	}
 
 	public Either<String, MessageEmbed> getDatagen() {
@@ -166,8 +147,38 @@ public class SolutionsCommand implements IGuildCommand {
 				.setColor(0x22747).build());
 	}
 
+	@Override
+	public String getDescription() {
+		return "Gets the list of solutions, or if an argument is specified, "
+				+ "gets a solution by the argument name (if it exists).";
+	}
+
+	public Either<String, MessageEmbed> getFormattingCodes() {
+		return Either.right(new EmbedBuilder().setTitle("List of minecraft formatting codes!")
+				.setImage("https://media.discordapp.net/attachments/645695673668337692/645723908737073152/unknown_1.png")
+				.setColor(BotUtils.generateRandomPastelColor()).build());
+	}
+
 	public Either<String, MessageEmbed> getIntellijGradle() {
 		return Either.right(new EmbedBuilder().setTitle("IntelliJ Gradle Settings").setDescription(
+				"If you use IntelliJ, you might have to set the Gradle Settings from 'default' to 'IntelliJ IDEA' for the Gradle to work properly.")
+				.setImage("https://i.postimg.cc/1tQ0NPNw/image.png").build());
+	}
+
+	public Either<String, MessageEmbed> getMissingProject() {
+		return Either.right(new EmbedBuilder().setTitle("(Eclipse) 'Open Project' has encountered a problem.")
+				.setDescription(
+						"If you recieve the following error, this usually means you are either missing the .project' file, or it is corrupted. To fix this you can use the `<bot_prefix>setup eclipse` command. This will give you the command that you need to run in Command Prompt at the root of your mod folder.")
+				.setImage("https://i.postimg.cc/G2xgLsHX/124.jpg").setColor(BotUtils.generateRandomPastelColor()).build());
+	}
+
+	@Override
+	public String getName() {
+		return "solutions";
+	}
+
+	public Either<String, MessageEmbed> getTooltip() {
+		return Either.right(new EmbedBuilder().setTitle("Adding tooltips to your items").setDescription(
 				"If you use IntelliJ, you might have to set the Gradle Settings from 'default' to 'IntelliJ IDEA' for the Gradle to work properly.")
 				.setImage("https://i.postimg.cc/1tQ0NPNw/image.png").build());
 	}
@@ -190,31 +201,7 @@ public class SolutionsCommand implements IGuildCommand {
 								+ "\" for More Information\"));\n        //\"\u00A7e\" is a color code\n        "
 								+ "//\"\u00A77\" is a color code\n    }\n}```",
 						false)
-				.setColor(BotUtils.generateRandomColor()).build());
-	}
-
-	public Either<String, MessageEmbed> getTooltip() {
-		return Either.right(new EmbedBuilder().setTitle("Adding tooltips to your items").setDescription(
-				"If you use IntelliJ, you might have to set the Gradle Settings from 'default' to 'IntelliJ IDEA' for the Gradle to work properly.")
-				.setImage("https://i.postimg.cc/1tQ0NPNw/image.png").build());
-	}
-
-	// place_block
-	// block_place
-	// ghost_block
-	public Either<String, MessageEmbed> getBlockPlace() {
-		return Either.right(new EmbedBuilder().setTitle("Ghost block when opening container with block in hand")
-				.setDescription("**When opening your container with a block in your hand, you experience an issue where it "
-						+ "places the block for a split second.**\n\n**How to fix:**\nYou can fix this issue by going into"
-						+ " your `onBlockActivated` method, and making sure you return the same action result every time. "
-						+ "You should always be returning `ActionResultType.SUCCESS` in this specific instance."
-						+ "\n\n**Why does this happen?**\nThe reason this is happening is because of the server side "
-						+ "check that you are doing to open the GUI. You are then retuning `SUCCESS` on the server "
-						+ "and `FAIL` on the client. This means that the client will try to use the held item, since it "
-						+ "is being told you were unable to complete the action. Whereas the server knows that you "
-						+ "succeded. This means the client will render the block, but only for a split second since "
-						+ "the server is denying the placement.")
-				.build());
+				.setColor(BotUtils.generateRandomPastelColor()).build());
 	}
 
 	// long_transparency
@@ -230,32 +217,53 @@ public class SolutionsCommand implements IGuildCommand {
 	}
 
 	@Override
-	public Pair<Boolean, List<String>> validChannels() {
-		return Pair.of(true, Arrays.asList("bot-stuff"));
+	public void handle(final CommandContext ctx) {
+		if (ctx.getArgs().length >= 1) {
+			final String solutionStr = ctx.getArgs()[0];
+			if (this.solutions.containsKey(solutionStr)) {
+				final var solution = this.solutions.get(solutionStr);
+				if (solution.shouldDM) {
+					ctx.getAuthor().openPrivateChannel().queue(channel -> {
+						if (solution.message.isLeft()) {
+							channel.sendMessage(format("Message sent by: %s", ctx.getAuthor().getAsMention())
+									+ solution.message.getLeft()).queue();
+						} else {
+							channel.sendMessageEmbeds(
+									new EmbedBuilder(solution.message.get()).setAuthor(
+											"Message sent by: " + ctx.getAuthor().getName() + "#"
+													+ ctx.getAuthor().getDiscriminator(),
+											null, ctx.getAuthor().getAvatarUrl()).build())
+									.queue();
+						}
+					});
+					ctx.getMessage().delete().queue();
+					return;
+				}
+				ctx.getMessage().replyEmbeds(new EmbedBuilder(solution.message.get()).build()).mentionRepliedUser(false)
+						.queue(reply -> {
+							reply.delete().queueAfter(5, TimeUnit.MINUTES);
+							ctx.getMessage().delete().queueAfter(5, TimeUnit.MINUTES);
+						});
+			} else {
+				ctx.getChannel()
+						.sendMessage(
+								format("You must provide a valid solution! For the list of solutions, use `%ssolutions`.",
+										BotUtils.getPrefixFromGuild(ctx.getGuild())))
+						.queue();
+			}
+			return;
+		}
+
+		final var embed = new EmbedBuilder().setTitle("List of available solutions:")
+				.setDescription("`" + join("`, `", this.solutions.keySet()) + "`").setColor(Color.CYAN);
+		ctx.getMessage().replyEmbeds(embed.build()).mentionRepliedUser(false).queue(reply -> {
+			reply.delete().queueAfter(45, TimeUnit.SECONDS);
+			ctx.getMessage().delete().queueAfter(45, TimeUnit.SECONDS);
+		});
 	}
 
-	private static final class Solution {
-		private boolean shouldDM = false;
-		private Set<String> aliases = new HashSet<>();
-		private Either<String, MessageEmbed> message;
-
-		private Solution(String name, Either<String, MessageEmbed> message) {
-			this.addAliases(name);
-			this.message = message;
-		}
-
-		public static Solution createSolution(String name, Either<String, MessageEmbed> message) {
-			return new Solution(name, message);
-		}
-
-		public Solution shouldDM() {
-			this.shouldDM = true;
-			return this;
-		}
-
-		public Solution addAliases(String... aliases) {
-			this.aliases.addAll(Arrays.asList(aliases));
-			return this;
-		}
+	@Override
+	public Pair<Boolean, List<String>> validChannels() {
+		return Pair.of(true, Arrays.asList("bot-stuff"));
 	}
 }

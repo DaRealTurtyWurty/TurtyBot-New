@@ -1,5 +1,2 @@
 eclipse.preferences.version=1
-encoding//src/main/java/io/github/darealturtywurty/turtybot/commands/bot/CommandHook.java=UTF-8
-encoding//src/main/java/io/github/darealturtywurty/turtybot/help_system/CloseChannelCommand.java=UTF-8
-encoding//src/main/java/io/github/darealturtywurty/turtybot/help_system/HelpManager.java=UTF-8
-encoding//src/main/java/io/github/darealturtywurty/turtybot/help_system/HelpReactionEventListener.java=UTF-8
+encoding//src/main/java/io/github/darealturtywurty/turtybot/commands/core/CommandHook.java=UTF-8
