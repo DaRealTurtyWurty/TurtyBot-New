@@ -25,8 +25,8 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class CommandHook extends ListenerAdapter {
+	public static final GitHubClient GITHUB_CLIENT = new GitHubClient().setOAuth2Token(BotUtils.getGithubToken());
 	private final CommandManager commandManager = new CommandManager();
-	private final GitHubClient githubClient = new GitHubClient().setOAuth2Token(BotUtils.getGithubToken());
 
 	private void hostFileOnline(final InputStream attachment, final String fileName, final Consumer<String> callback) {
 		try {
@@ -53,21 +53,6 @@ public class CommandHook extends ListenerAdapter {
 	@Override
 	public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
 		final var user = event.getAuthor();
-
-		final String shortenedText = event.getMessage().getContentRaw().toLowerCase().trim();
-		if (shortenedText.contains("sus") || shortenedText.contains("amogus") || shortenedText.contains("amongus")
-				|| shortenedText.contains("imposter")) {
-			try {
-				user.openPrivateChannel().queue(channel -> channel.sendMessage(Constants.BEAN_DUMPY_URL).queue());
-			} catch (final UnsupportedOperationException e) {
-				event.getMessage().reply(Constants.BEAN_DUMPY_URL).queue();
-			}
-		}
-
-		if (event.getMessage().getContentRaw().contains("discord.gg") && !BotUtils.isBotOwner(user)) {
-			event.getMessage().delete().queue();
-			return;
-		}
 
 		// Handle Text Files
 		if (!event.getMessage().getAttachments().isEmpty()) {

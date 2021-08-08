@@ -21,11 +21,11 @@ public class BanCommand implements IGuildCommand {
 		final var bannedEmbed = new EmbedBuilder().setColor(Color.RED).setTitle("You were banned from: " + guild.getName())
 				.setDescription("**Reason**: " + reason + "\n**Banned By**: " + banner.getAsMention());
 		toBan.getUser().openPrivateChannel().queueAfter(5, TimeUnit.SECONDS,
-				channel -> channel.sendMessageEmbeds(bannedEmbed.build()).queue(msg -> toBan.ban(0, reason).queue()));
+				channel -> channel.sendMessageEmbeds(bannedEmbed.build()).queue());
 
 		final var banLogEmbed = new EmbedBuilder().setColor(Color.RED).setTitle(toBan.getEffectiveName() + " was banned!")
 				.setDescription("**Reason**: " + reason + "\n**Banned By**: " + banner.getAsMention());
-		BotUtils.getModLogChannel(guild).sendMessageEmbeds(banLogEmbed.build()).queue();
+		BotUtils.getModLogChannel(guild).sendMessageEmbeds(banLogEmbed.build()).queue(msg -> toBan.ban(0, reason).queue());
 
 		if (toDelete != null) {
 			toDelete.delete().queue();

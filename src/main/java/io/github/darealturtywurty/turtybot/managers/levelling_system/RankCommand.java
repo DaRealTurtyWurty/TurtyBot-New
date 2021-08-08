@@ -126,7 +126,7 @@ public class RankCommand implements IGuildCommand {
 		final double d = (long) n / 100 / 10.0;
 		final boolean isRound = d * 10 % 10 == 0;// true if the decimal part is equal to 0 (then it's trimmed anyway)
 		return d < 1000 ? // this determines the class, i.e. 'k', 'm' etc
-				(d > 99.9 || isRound || !isRound && d > 9.99 ? // this decides whether to trim the decimals
+				(d > 99.9 || isRound && d > 9.99 ? // this decides whether to trim the decimals
 						(int) d * 10 / 10 : d + "" // (int) d * 10 / 10 drops the decimal
 				) + "" + CHARS[iteration] : xpFormat(d, iteration + 1);
 
@@ -168,7 +168,19 @@ public class RankCommand implements IGuildCommand {
 
 	@Override
 	public void handle(final CommandContext ctx) {
-		ctx.getMessage().reply(makeRankCard(ctx.getMember()), "rank_card.png").mentionRepliedUser(false).queue();
+		var member = ctx.getMember();
+		if (!ctx.getMessage().getMentionedMembers().isEmpty()) {
+			member = ctx.getMessage().getMentionedMembers().get(0);
+		}
+
+		if (ctx.getArgs().length > 0) {
+			try {
+				member = ctx.getGuild().getMemberById(Integer.parseInt(ctx.getArgs()[0]));
+			} catch (final NumberFormatException ex) {
+				// Nothing
+			}
+		}
+		ctx.getMessage().reply(makeRankCard(member), "rank_card.png").mentionRepliedUser(false).queue();
 	}
 
 	@Nullable
@@ -245,7 +257,7 @@ public class RankCommand implements IGuildCommand {
 			// Rank
 			graphics.setColor(card.rankTextColour);
 			graphics.setFont(this.usedFont.deriveFont(35f));
-			final int rank = Constants.LEVELLING_MANAGER.getRank(member);
+			int rank = Constants.LEVELLING_MANAGER.getRank(member);
 
 			var xModifier = 0;
 			if (rank >= 10) {
@@ -264,6 +276,10 @@ public class RankCommand implements IGuildCommand {
 				xModifier += 15;
 			}
 
+			if (rank < 0) {
+				rank = 0;
+			}
+
 			graphics.drawString("Rank #" + (rank + 1), 690 - xModifier, 110);
 
 			final var fontMetrics = graphics.getFontMetrics();
@@ -273,7 +289,7 @@ public class RankCommand implements IGuildCommand {
 
 			// XP and Level
 			int xp = Constants.LEVELLING_MANAGER.getUserXP(member);
-			final int level = LevellingManager.getLevelForXP(xp);
+			int level = LevellingManager.getLevelForXP(xp);
 			int nextLevelXP = LevellingManager.getXPForLevel(level + 1);
 			xp -= LevellingManager.getXPForLevel(level);
 			nextLevelXP -= LevellingManager.getXPForLevel(level);
@@ -281,6 +297,22 @@ public class RankCommand implements IGuildCommand {
 			final var decimalFormat = new DecimalFormat("#.#");
 			decimalFormat.setRoundingMode(RoundingMode.CEILING);
 			xpPercent = Float.parseFloat(decimalFormat.format(xpPercent));
+			if (xp < 0) {
+				xp = 0;
+			}
+
+			if (xpPercent < 0) {
+				xpPercent = 0;
+			}
+
+			if (nextLevelXP < 0) {
+				nextLevelXP = 0;
+			}
+
+			if (level < 0) {
+				level = 0;
+			}
+
 			final var xpStr = xpFormat(xp, 0);
 			final var levelStr = String.valueOf(level);
 			final var nextLevelXPStr = xpFormat(nextLevelXP, 0);

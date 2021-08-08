@@ -12,13 +12,25 @@ import net.dv8tion.jda.api.sharding.ShardManager;
 public interface ICommandContext {
 
 	/**
-	 * Returns the {@link net.dv8tion.jda.api.entities.Guild} for the current
-	 * command/event
+	 * Returns the {@link net.dv8tion.jda.api.entities.User author} of the message
+	 * as user
 	 *
-	 * @return the {@link net.dv8tion.jda.api.entities.Guild} for this command/event
+	 * @return the {@link net.dv8tion.jda.api.entities.User author} of the message
+	 *         as user
 	 */
-	default Guild getGuild() {
-		return this.getEvent().getGuild();
+	default User getAuthor() {
+		return getEvent().getAuthor();
+	}
+
+	/**
+	 * Returns the {@link net.dv8tion.jda.api.entities.TextChannel channel} that the
+	 * message for this event was send in
+	 *
+	 * @return the {@link net.dv8tion.jda.api.entities.TextChannel channel} that the
+	 *         message for this event was send in
+	 */
+	default TextChannel getChannel() {
+		return getEvent().getChannel();
 	}
 
 	/**
@@ -33,36 +45,22 @@ public interface ICommandContext {
 	GuildMessageReceivedEvent getEvent();
 
 	/**
-	 * Returns the {@link net.dv8tion.jda.api.entities.TextChannel channel} that the
-	 * message for this event was send in
+	 * Returns the {@link net.dv8tion.jda.api.entities.Guild} for the current
+	 * command/event
 	 *
-	 * @return the {@link net.dv8tion.jda.api.entities.TextChannel channel} that the
-	 *         message for this event was send in
+	 * @return the {@link net.dv8tion.jda.api.entities.Guild} for this command/event
 	 */
-	default TextChannel getChannel() {
-		return this.getEvent().getChannel();
+	default Guild getGuild() {
+		return getEvent().getGuild();
 	}
 
 	/**
-	 * Returns the {@link net.dv8tion.jda.api.entities.Message message} that
-	 * triggered this event
+	 * Returns the current {@link net.dv8tion.jda.api.JDA jda} instance
 	 *
-	 * @return the {@link net.dv8tion.jda.api.entities.Message message} that
-	 *         triggered this event
+	 * @return the current {@link net.dv8tion.jda.api.JDA jda} instance
 	 */
-	default Message getMessage() {
-		return this.getEvent().getMessage();
-	}
-
-	/**
-	 * Returns the {@link net.dv8tion.jda.api.entities.User author} of the message
-	 * as user
-	 *
-	 * @return the {@link net.dv8tion.jda.api.entities.User author} of the message
-	 *         as user
-	 */
-	default User getAuthor() {
-		return this.getEvent().getAuthor();
+	default JDA getJDA() {
+		return getEvent().getJDA();
 	}
 
 	/**
@@ -73,38 +71,11 @@ public interface ICommandContext {
 	 *         as member
 	 */
 	default Member getMember() {
-		return this.getEvent().getMember();
+		return getEvent().getMember();
 	}
 
-	/**
-	 * Returns the current {@link net.dv8tion.jda.api.JDA jda} instance
-	 *
-	 * @return the current {@link net.dv8tion.jda.api.JDA jda} instance
-	 */
-	default JDA getJDA() {
-		return this.getEvent().getJDA();
-	}
-
-	/**
-	 * Returns the current {@link net.dv8tion.jda.api.sharding.ShardManager}
-	 * instance
-	 *
-	 * @return the current {@link net.dv8tion.jda.api.sharding.ShardManager}
-	 *         instance
-	 */
-	default ShardManager getShardManager() {
-		return this.getJDA().getShardManager();
-	}
-
-	/**
-	 * Returns the {@link net.dv8tion.jda.api.entities.User user} for the currently
-	 * logged in account
-	 *
-	 * @return the {@link net.dv8tion.jda.api.entities.User user} for the currently
-	 *         logged in account
-	 */
-	default User getSelfUser() {
-		return this.getJDA().getSelfUser();
+	default Message getMessage() {
+		return getEvent().getMessage();
 	}
 
 	/**
@@ -115,6 +86,28 @@ public interface ICommandContext {
 	 *         for the currently logged in account
 	 */
 	default Member getSelfMember() {
-		return this.getGuild().getSelfMember();
+		return getGuild().getSelfMember();
+	}
+
+	/**
+	 * Returns the {@link net.dv8tion.jda.api.entities.User user} for the currently
+	 * logged in account
+	 *
+	 * @return the {@link net.dv8tion.jda.api.entities.User user} for the currently
+	 *         logged in account
+	 */
+	default User getSelfUser() {
+		return getJDA().getSelfUser();
+	}
+
+	/**
+	 * Returns the current {@link net.dv8tion.jda.api.sharding.ShardManager}
+	 * instance
+	 *
+	 * @return the current {@link net.dv8tion.jda.api.sharding.ShardManager}
+	 *         instance
+	 */
+	default ShardManager getShardManager() {
+		return getJDA().getShardManager();
 	}
 }

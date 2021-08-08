@@ -3,6 +3,7 @@ package io.github.darealturtywurty.turtybot.commands.moderation;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
@@ -38,25 +39,23 @@ public class WarningsCommand implements IGuildCommand {
 	public void handle(final CommandContext ctx) {
 		final var message = ctx.getMessage();
 		final var guild = ctx.getGuild();
-		if (ctx.getArgs().length < 1) {
-			ctx.getMessage().reply("You must supply the user that you want to get warnings from.").mentionRepliedUser(false)
-					.queue();
-			return;
-		}
-
-		final String toGetStr = ctx.getArgs()[0];
-
 		Member toGet = null;
-		try {
-			toGet = message.getMentionedMembers().get(0);
-		} catch (final IndexOutOfBoundsException ex) {
-			guild.retrieveMemberById(toGetStr).queue();
-			toGet = guild.getMemberById(toGetStr);
-		}
+		if (ctx.getArgs().length >= 1) {
+			final String toGetStr = ctx.getArgs()[0];
 
-		if (toGet == null) {
-			message.reply("Could not find user: " + toGetStr).mentionRepliedUser(false).queue();
-			return;
+			try {
+				toGet = message.getMentionedMembers().get(0);
+			} catch (final IndexOutOfBoundsException ex) {
+				guild.retrieveMemberById(toGetStr).queue();
+				toGet = guild.getMemberById(toGetStr);
+			}
+
+			if (toGet == null) {
+				message.reply("Could not find user: " + toGetStr).mentionRepliedUser(false).queue();
+				return;
+			}
+		} else {
+			toGet = guild.getMemberById(message.getAuthor().getIdLong());
 		}
 
 		final var userWarns = WarnUtils.getUserWarns(guild, toGet);
@@ -64,11 +63,11 @@ public class WarningsCommand implements IGuildCommand {
 				.setTitle("Warnings for: " + toGet.getEffectiveName())
 				.setDescription(toGet.getEffectiveName() + " has " + userWarns.getNumberWarns() + " warnings!")
 				.setTimestamp(Instant.now());
-		userWarns.warns
-				.forEach((uuid, warnInfo) -> warnsEmbed.addField("UUID:",
-						uuid.toString() + "\n\n**Warned By (ID):**\n" + warnInfo.left + "\n\n**Date:**\n"
-								+ Constants.DATE_FORMAT.format(warnInfo.middle) + "\n\n**Reason:**\n" + warnInfo.right,
-						false));
+		final var counter = new AtomicInteger(1);
+		userWarns.warns.forEach((uuid, warnInfo) -> warnsEmbed.addField(
+				counter.getAndIncrement() + ".", "**UUID:** " + uuid.toString() + "\n**Warned By (ID):** " + warnInfo.left
+						+ "\n**Date:** " + Constants.DATE_FORMAT.format(warnInfo.middle) + "\n**Reason:** " + warnInfo.right,
+				false));
 
 		message.replyEmbeds(warnsEmbed.build()).mentionRepliedUser(false).queue();
 	}

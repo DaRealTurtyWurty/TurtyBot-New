@@ -64,7 +64,7 @@ public class CommandListCommand implements IGuildCommand {
 
 			this.commandManager.getCommands().stream().filter(cmd -> cmd.getCategory() == category).filter(Objects::nonNull)
 					.sorted((cmd1, cmd2) -> cmd1.getName().compareTo(cmd2.getName()))
-					.forEach(cmd -> embed.addField(prefix + cmd.getName(), cmd.getDescription(), true));
+					.forEach(cmd -> embed.addField(prefix + cmd.getName(), cmd.getDescription(), false));
 			embed.setColor(BotUtils.generateRandomPastelColor());
 			ctx.getMessage().replyEmbeds(embed.build()).mentionRepliedUser(false).queue();
 		}

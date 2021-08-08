@@ -1,20 +1,26 @@
 package io.github.darealturtywurty.turtybot.managers.help_system;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import io.github.darealturtywurty.turtybot.managers.modding_helper.ModdingHelperManager;
 import io.github.darealturtywurty.turtybot.util.BotUtils;
+import io.github.darealturtywurty.turtybot.util.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.internal.utils.tuple.Pair;
@@ -22,9 +28,20 @@ import net.dv8tion.jda.internal.utils.tuple.Pair;
 public final class HelpManager {
 
 	public static class HelpEventListener extends ListenerAdapter {
+
+		private final boolean closing;
+
+		public HelpEventListener() {
+			this(false);
+		}
+
+		public HelpEventListener(final boolean closing) {
+			this.closing = closing;
+		}
+
 		@Override
 		public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
-			final TextChannel channel = event.getChannel();
+			final var channel = event.getChannel();
 			final var channelID = channel.getIdLong();
 			final var message = event.getMessage();
 
@@ -41,7 +58,7 @@ public final class HelpManager {
 			if (!event.getAuthor().getId().equalsIgnoreCase(ownerID))
 				return;
 
-			final Pair<HelpData, Integer> data = CHANNEL_STAGE_MAP.get(channelID);
+			final Pair<HelpData, Integer> data = CHANNEL_STAGE_MAP.get(channelID).getLeft();
 			final var helpData = data.getLeft();
 
 			switch (data.getRight()) {
@@ -52,7 +69,7 @@ public final class HelpManager {
 				channel.sendMessage("Please provide an image or video of the issue. "
 						+ "This could be an image in-game, or an image of the error in the code. "
 						+ "If you are unable to provide this information, please respond with `N/A`!").queue();
-				CHANNEL_STAGE_MAP.put(channelID, Pair.of(helpData, 1));
+				CHANNEL_STAGE_MAP.put(channelID, Pair.of(Pair.of(helpData, 1), CHANNEL_STAGE_MAP.get(channelID).getRight()));
 				break;
 			case 1:
 				helpData.setMedia(
@@ -62,26 +79,44 @@ public final class HelpManager {
 								+ "If this file does not exist or is empty, please try to re-run the game and check. "
 								+ "If it is still empty, please state that.")
 						.queue();
-				CHANNEL_STAGE_MAP.put(channelID, Pair.of(helpData, 2));
+				CHANNEL_STAGE_MAP.put(channelID, Pair.of(Pair.of(helpData, 2), CHANNEL_STAGE_MAP.get(channelID).getRight()));
 				break;
 			case 2:
 				helpData.setLogs(
 						message.getEmbeds().isEmpty() ? message.getContentRaw() : message.getAttachments().get(0).getUrl());
 				channel.getHistory().retrievePast(20).queue(messages -> channel.deleteMessages(messages).queue());
-				CHANNEL_STAGE_MAP.put(channelID, Pair.of(helpData, 3));
+				CHANNEL_STAGE_MAP.put(channelID, Pair.of(Pair.of(helpData, 3), CHANNEL_STAGE_MAP.get(channelID).getRight()));
 				postProblem(event.getGuild(), channelID, helpData);
 				sendFormattedInformation(channel, helpData, ownerID);
 				break;
 			default:
 				break;
 			}
+
+			if (this.closing) {
+				handleClosing(channel, message, Long.parseLong(ownerID));
+			}
+		}
+
+		@Override
+		public void onTextChannelDelete(final TextChannelDeleteEvent event) {
+			if (CHANNEL_STAGE_MAP.containsKey(event.getChannel().getIdLong())) {
+				closeChannel(event.getChannel());
+			}
 		}
 	}
 
 	protected static final Set<Map<Long, Long>> CHANNEL_SET = new HashSet<>();
-	protected static final Map<Long, Pair<HelpData, Integer>> CHANNEL_STAGE_MAP = new HashMap<>();
+
+	protected static final Map<Long, Pair<Pair<HelpData, Integer>, Pair<CloseData, Integer>>> CHANNEL_STAGE_MAP = new HashMap<>();
 	protected static final int MAX_CHANNEL_COUNT = 50;
 	protected static final String SUPPORT = "Support ";
+
+	private static void closeChannel(final TextChannel channel) {
+		CHANNEL_STAGE_MAP.remove(channel.getIdLong());
+		deleteProblemMessage(channel.getGuild(), channel.getTopic().split("\n")[0]);
+		channel.delete().queue();
+	}
 
 	protected static void createChannel(final Guild guild, final User user, final String description) {
 		var complete = false;
@@ -147,6 +182,92 @@ public final class HelpManager {
 				return;
 			possibleProblems.get(0).delete().queue();
 		});
+	}
+
+	public static void handleClosing(final TextChannel channel, final Message message, final long ownerID) {
+		Pair<CloseData, Integer> closeData = CHANNEL_STAGE_MAP.get(channel.getIdLong()).getRight();
+		final Pair<HelpData, Integer> helpData = CHANNEL_STAGE_MAP.get(channel.getIdLong()).getLeft();
+		if (closeData == null) {
+			closeData = Pair.of(new CloseData(), 0);
+			CHANNEL_STAGE_MAP.put(channel.getIdLong(), Pair.of(helpData, closeData));
+		}
+
+		switch (closeData.getRight()) {
+		case 0:
+			channel.sendMessage("Did you receive the help that you needed from this help channel? (Y/N)").queue();
+			CHANNEL_STAGE_MAP.put(channel.getIdLong(), Pair.of(helpData, Pair.of(closeData.getLeft(), 1)));
+			break;
+		case 1:
+			switch (message.getContentDisplay().strip().toLowerCase()) {
+			case "y":
+				channel.sendMessage("I am glad that you managed to receieve the support you needed!\n"
+						+ "Can you provide the IDs or `@user`s of all of the users that helped you; "
+						+ "If no users helped you, please reply with `N/A`.").queue();
+				CHANNEL_STAGE_MAP.put(channel.getIdLong(), Pair.of(helpData, Pair.of(closeData.getLeft(), 2)));
+				break;
+			case "n":
+				channel.sendMessage(
+						"I apologise that you did not receive the support you needed! Lots of people need help and unfortunately, "
+								+ "we cannot help everyone due to real world circumstances. There are also some problems that "
+								+ "we may not know how to fix, as not all modders know everything. If you feel that the latter of these "
+								+ "is the case, you can run `!mmd` or `!forgecord` in #bot-stuff to bring you to a server that "
+								+ "has a wider range of users with a wider range of knowledge.")
+						.queue();
+				closeChannel(channel);
+				channel.delete().queue();
+				break;
+			default:
+				channel.sendMessage("Did you receive the help that you needed from this help channel? (Y/N)").queue();
+				break;
+			}
+			break;
+		case 2:
+			final String text = message.getContentRaw();
+			if (text.trim().equalsIgnoreCase("n/a")) {
+				CHANNEL_STAGE_MAP.put(channel.getIdLong(), Pair.of(helpData, Pair.of(closeData.getLeft(), 3)));
+				break;
+			}
+
+			final List<Member> members = new ArrayList<>();
+			message.getMentionedMembers().forEach(member -> {
+				if (sentMessage(channel, member.getIdLong())) {
+					members.add(member);
+				}
+			});
+
+			for (final String argument : message.getContentDisplay().split(" ")) {
+				try {
+					channel.getGuild().retrieveMemberById(Long.parseLong(argument)).queue(member -> {
+						if (member != null) {
+							members.add(member);
+						}
+					});
+				} catch (final NumberFormatException ex) {
+					// Skip (this is only here because I was moaned at for leaving this empty)
+				}
+			}
+
+			final List<Member> verifiedMembers = members.stream()
+					.filter(member -> channel.getPermissionOverrides().stream()
+							.anyMatch(override -> member.hasAccess(channel) && channel.canTalk(member)))
+					.collect(Collectors.toList());
+			if (verifiedMembers.isEmpty()) {
+				BotUtils.getModLogChannel(channel.getGuild())
+						.sendMessage("User (" + ownerID + ") provided no users or invalid users!").queue();
+				closeChannel(channel);
+				break;
+			}
+
+			verifiedMembers.forEach(member -> {
+				Constants.LEVELLING_MANAGER.setUserXP(member,
+						Constants.LEVELLING_MANAGER.getUserXP(member) + Constants.RANDOM.nextInt(25) + 5);
+				ModdingHelperManager.incrementUser(member.getIdLong());
+			});
+			closeChannel(channel);
+			break;
+		default:
+			break;
+		}
 	}
 
 	protected static boolean hasChannel(final Guild guild, final User user) {
@@ -217,13 +338,24 @@ public final class HelpManager {
 				+ data.getLogs()).queueAfter(1, TimeUnit.SECONDS);
 	}
 
+	private static boolean sentMessage(final TextChannel channel, final long userID) {
+		final var sent = new AtomicBoolean(false);
+		channel.getHistory().retrievePast(100).queue(messages -> sent.set(messages.stream()
+				.filter(msg -> msg.getContentRaw().length() > 5).anyMatch(msg -> msg.getAuthor().getIdLong() == userID)));
+		return sent.get();
+	}
+
 	protected static void setStage(final TextChannel channel, final long ownerID, final int stage) {
 		channel.getManager().setTopic(ownerID + "\n" + channel.getTopic()).queue();
-		Pair<HelpData, Integer> data = CHANNEL_STAGE_MAP.get(channel.getIdLong());
+		final Pair<Pair<HelpData, Integer>, Pair<CloseData, Integer>> data = CHANNEL_STAGE_MAP.get(channel.getIdLong());
 		if (data == null) {
-			data = Pair.of(new HelpData(), 0);
+			CHANNEL_STAGE_MAP.put(channel.getIdLong(), Pair.of(Pair.of(new HelpData(), stage), null));
+		} else {
+			CHANNEL_STAGE_MAP.put(channel.getIdLong(),
+					Pair.of(Pair.of(CHANNEL_STAGE_MAP.get(channel.getIdLong()).getLeft().getLeft(),
+							CHANNEL_STAGE_MAP.get(channel.getIdLong()).getLeft().getRight() + 1),
+							CHANNEL_STAGE_MAP.get(channel.getIdLong()).getRight()));
 		}
-		CHANNEL_STAGE_MAP.put(channel.getIdLong(), Pair.of(data.getLeft(), stage));
 	}
 
 	private HelpManager() {

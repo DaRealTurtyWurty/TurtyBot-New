@@ -1,6 +1,5 @@
 package io.github.darealturtywurty.turtybot.managers.help_system;
 
-import static io.github.darealturtywurty.turtybot.managers.help_system.HelpManager.deleteProblemMessage;
 import static io.github.darealturtywurty.turtybot.managers.help_system.HelpManager.removeChannel;
 
 import io.github.darealturtywurty.turtybot.util.BotUtils;
@@ -50,8 +49,9 @@ public class HelpReactionEventListener extends ListenerAdapter {
 							|| !this.helpChannel.getTopic().split("\n")[0].equalsIgnoreCase(event.getUser().getId())))
 				return;
 			event.retrieveUser().queue(user -> event.retrieveMember().queue(member -> {
-				deleteProblemMessage(event.getGuild(), this.helpChannel.getTopic().split("\n")[0]);
-				this.helpChannel.delete().queue();
+				event.getJDA().addEventListener(new HelpManager.HelpEventListener(true));
+				HelpManager.handleClosing(this.helpChannel, null,
+						Long.parseLong(this.helpChannel.getTopic().split("\n")[0]));
 			}));
 			event.getJDA().removeEventListener(this);
 			break;

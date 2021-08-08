@@ -12,12 +12,12 @@ public class CommandContext implements ICommandContext {
 		this.args = args;
 	}
 
+	public String[] getArgs() {
+		return this.args;
+	}
+
 	@Override
 	public GuildMessageReceivedEvent getEvent() {
 		return this.event;
-	}
-
-	public String[] getArgs() {
-		return this.args;
 	}
 }

@@ -10,9 +10,20 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import io.github.darealturtywurty.turtybot.commands.fun.AdviceCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.AmogusCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.CatImageCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.CatSaysCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.CoinFlipCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.DogImageCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.EightBallCommand;
 import io.github.darealturtywurty.turtybot.commands.fun.InternetRuleCommand;
 import io.github.darealturtywurty.turtybot.commands.fun.MemeCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.ProgrammingMemeCommand;
 import io.github.darealturtywurty.turtybot.commands.fun.PutinCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.ReverseTextCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.UpsideDownTextCommand;
+import io.github.darealturtywurty.turtybot.commands.fun.UrbanDictionaryCommand;
+import io.github.darealturtywurty.turtybot.commands.minecraft.MCNameHistory;
 import io.github.darealturtywurty.turtybot.commands.minecraft.MojangStatusCommand;
 import io.github.darealturtywurty.turtybot.commands.minecraft.UserUUIDCommand;
 import io.github.darealturtywurty.turtybot.commands.moderation.BanCommand;
@@ -28,6 +39,7 @@ import io.github.darealturtywurty.turtybot.commands.moderation.WarningsCommand;
 import io.github.darealturtywurty.turtybot.commands.utility.BotInfoCommand;
 import io.github.darealturtywurty.turtybot.commands.utility.CommandListCommand;
 import io.github.darealturtywurty.turtybot.commands.utility.ConfigCommand;
+import io.github.darealturtywurty.turtybot.commands.utility.GithubRepoCommand;
 import io.github.darealturtywurty.turtybot.commands.utility.HelpCommand;
 import io.github.darealturtywurty.turtybot.commands.utility.PingCommand;
 import io.github.darealturtywurty.turtybot.commands.utility.RestartCommand;
@@ -113,6 +125,18 @@ public class CommandManager {
 		addCommand(new ClearQueueCommand());
 
 		addCommand(new MemeCommand());
+		addCommand(new ProgrammingMemeCommand());
+		addCommand(new DogImageCommand());
+		addCommand(new CatImageCommand());
+		addCommand(new CatSaysCommand());
+		addCommand(new EightBallCommand());
+		addCommand(new CoinFlipCommand());
+		addCommand(new ReverseTextCommand());
+		addCommand(new UpsideDownTextCommand());
+		addCommand(new UrbanDictionaryCommand());
+		addCommand(new AmogusCommand());
+		addCommand(new MCNameHistory());
+		addCommand(new GithubRepoCommand());
 	}
 
 	public void addCommand(final IGuildCommand cmd) {

@@ -26,12 +26,25 @@ public class HelpData {
 	protected HelpData() {
 	}
 
-	protected HelpData(long ownerID, String title, String description, String media, String logs) {
+	protected HelpData(final long ownerID, final String title, final String description, final String media,
+			final String logs) {
 		this.ownerID = ownerID;
 		this.title = title;
 		this.description = description;
 		this.media = media;
 		this.logs = logs;
+	}
+
+	public String getDescription() {
+		return this.description;
+	}
+
+	public String getLogs() {
+		return this.logs;
+	}
+
+	public String getMedia() {
+		return this.media;
 	}
 
 	public long getOwner() {
@@ -42,35 +55,23 @@ public class HelpData {
 		return this.title;
 	}
 
-	public String getDescription() {
-		return this.description;
-	}
-
-	public String getMedia() {
-		return this.media;
-	}
-
-	public String getLogs() {
-		return this.logs;
-	}
-
-	protected void setOwner(long ownerID) {
-		this.ownerID = ownerID;
-	}
-
-	protected void setTitle(String title) {
-		this.title = title;
-	}
-
-	protected void setDescription(String description) {
+	protected void setDescription(final String description) {
 		this.description = description;
 	}
 
-	protected void setMedia(String media) {
+	protected void setLogs(final String logs) {
+		this.logs = logs;
+	}
+
+	protected void setMedia(final String media) {
 		this.media = media;
 	}
 
-	protected void setLogs(String logs) {
-		this.logs = logs;
+	protected void setOwner(final long ownerID) {
+		this.ownerID = ownerID;
+	}
+
+	protected void setTitle(final String title) {
+		this.title = title;
 	}
 }

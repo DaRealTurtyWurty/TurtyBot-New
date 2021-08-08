@@ -12,7 +12,6 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
 import io.github.darealturtywurty.turtybot.util.Constants;
-import net.dv8tion.jda.api.entities.TextChannel;
 
 public class InternetRuleCommand implements IGuildCommand {
 
@@ -47,25 +46,27 @@ public class InternetRuleCommand implements IGuildCommand {
 
 	@Override
 	public void handle(final CommandContext ctx) {
-		final TextChannel channel = ctx.getChannel();
-		var noNumber = false;
 		if (ctx.getArgs().length < 1) {
-			noNumber = true;
-		} else {
-			try {
-				Integer.parseInt(ctx.getArgs()[0]);
-				noNumber = false;
-			} catch (final NumberFormatException e) {
-				noNumber = true;
+			ctx.getMessage().reply("You must specify the rule number! (1-100)").mentionRepliedUser(false).queue();
+			return;
+		}
+
+		int number = 0;
+		try {
+			number = Integer.parseInt(ctx.getArgs()[0]);
+			if (number < 1) {
+				ctx.getMessage().reply("You must specify the rule number! (1-100)").mentionRepliedUser(false).queue();
+				return;
 			}
+
+			if (number > RULES.size()) {
+				ctx.getMessage().reply("You must specify the rule number! (1-100)").mentionRepliedUser(false).queue();
+				return;
+			}
+		} catch (final NumberFormatException ex) {
+			number = 0;
 		}
 
-		if (!noNumber && RULES.size() > Integer.parseInt(ctx.getArgs()[0])) {
-			channel.sendMessage(RULES.get(Integer.parseInt(ctx.getArgs()[0]) - 1)).queue();
-		} else {
-			channel.sendMessage("Invalid rule number! There are only " + RULES.size() + " rules.").queue();
-		}
-
-		ctx.getMessage().delete().queue();
+		ctx.getMessage().reply(RULES.get(number - 1)).mentionRepliedUser(false).queue();
 	}
 }

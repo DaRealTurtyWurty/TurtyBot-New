@@ -4,6 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import io.github.darealturtywurty.turtybot.commands.core.CommandHook;
+import io.github.darealturtywurty.turtybot.managers.auto_mod.AutoModerator;
 import io.github.darealturtywurty.turtybot.managers.help_system.HelpManager.HelpEventListener;
 import io.github.darealturtywurty.turtybot.managers.music.MusicManager;
 import io.github.darealturtywurty.turtybot.managers.music.VoiceChannelListener;
@@ -33,7 +34,7 @@ public class TurtyBot {
 
 	private TurtyBot(final JDA bot) {
 		bot.addEventListener(new HelpEventListener(), new StarboardManager(), Constants.LEVELLING_MANAGER,
-				new VoiceChannelListener());
+				new VoiceChannelListener(), new AutoModerator());
 		Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
 		MusicManager.register();
 		Constants.LOGGER.info("I have finished loading everything!");

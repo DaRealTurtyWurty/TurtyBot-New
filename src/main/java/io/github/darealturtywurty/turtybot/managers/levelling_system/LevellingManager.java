@@ -188,7 +188,7 @@ public class LevellingManager extends ListenerAdapter {
 		randXp(event.getMessage(), event.getMember());
 	}
 
-	private void randXp(final Message message, final Member member) {
+	public void randXp(final Message message, final Member member) {
 		float messageMultiplier = message.getContentRaw().length() > 64 ? 1.5f : 1f;
 		if (message.getContentRaw().length() <= 0) {
 			messageMultiplier = 0f;
