@@ -10,74 +10,20 @@ import io.github.darealturtywurty.turtybot.util.Constants;
 
 public class InventoryItem {
 
-	public static class Builder {
-		public static Builder create(final String name, final String itemUrl, final Type type) {
-			return new Builder(name, itemUrl, type);
-		}
+	protected final String name, url;
 
-		private final String itemName, itemUrl;
-		private Rarity itemRarity = Rarity.COMMON;
-		private final Type itemType;
+	protected final Rarity rarity;
 
-		private boolean premiumOnly = false;
+	protected final Type itemType;
 
-		private Builder(final String name, final String itemUrl, final Type type) {
-			this.itemName = name;
-			this.itemUrl = itemUrl;
-			this.itemType = type;
-		}
+	protected final boolean premiumOnly;
 
-		public InventoryItem build() {
-			return new InventoryItem(this);
-		}
-
-		public Builder setPremium(final boolean premium) {
-			this.premiumOnly = premium;
-			return this;
-		}
-
-		public Builder setRarity(final Rarity rarity) {
-			this.itemRarity = rarity;
-			return this;
-		}
-	}
-
-	protected enum Rarity {
-		COMMON("common"), UNCOMMON("uncommon"), RARE("rare"), EPIC("epic"), LEGENDARY("legendary"), MYSTICAL("mystical");
-
-		public static Rarity byName(final String name) {
-			try {
-				return Stream.of(Rarity.values()).filter(type -> type.name.equalsIgnoreCase(name)).findFirst().get();
-			} catch (final NoSuchElementException e) {
-				throw new IllegalArgumentException(name + " is not a valid type!");
-			}
-		}
-
-		protected final String name;
-
-		Rarity(final String name) {
-			this.name = name;
-		}
-	}
-
-	protected enum Type {
-		BACKGROUND_IMAGE("bgImg"), OUTLINE_IMAGE("outImg"), XP_BAR_OUTLINE_IMAGE("xpOutImg"),
-		XP_BAR_EMPTY_IMAGE("xpEmptyImg"), XP_BAR_FILL_IMAGE("xpFillImg"), AVATAR_OUTLINE_IMAGE("avatarOutImg"),
-		WRAPPER("wrapper");
-
-		public static Type byName(final String name) {
-			try {
-				return Stream.of(Type.values()).filter(type -> type.name.equalsIgnoreCase(name)).findFirst().get();
-			} catch (final NoSuchElementException e) {
-				throw new IllegalArgumentException(name + " is not a valid type!");
-			}
-		}
-
-		protected final String name;
-
-		Type(final String name) {
-			this.name = name;
-		}
+	private InventoryItem(final Builder builder) {
+		this.name = builder.itemName;
+		this.url = builder.itemUrl;
+		this.rarity = builder.itemRarity;
+		this.itemType = builder.itemType;
+		this.premiumOnly = builder.premiumOnly;
 	}
 
 	public static Builder parse(final JsonObject object, final String loc) {
@@ -111,7 +57,6 @@ public class InventoryItem {
 		}
 		return itemBuilder;
 	}
-
 	public static JsonObject serialize(final InventoryItem item) {
 		final var object = new JsonObject();
 		object.addProperty("Name", item.name);
@@ -121,17 +66,72 @@ public class InventoryItem {
 		object.addProperty("Rarity", item.rarity.name);
 		return object;
 	}
+	public static class Builder {
+		private final String itemName, itemUrl;
 
-	protected final String name, url;
-	protected final Rarity rarity;
-	protected final Type itemType;
-	protected final boolean premiumOnly;
+		private Rarity itemRarity = Rarity.COMMON;
+		private final Type itemType;
+		private boolean premiumOnly = false;
 
-	private InventoryItem(final Builder builder) {
-		this.name = builder.itemName;
-		this.url = builder.itemUrl;
-		this.rarity = builder.itemRarity;
-		this.itemType = builder.itemType;
-		this.premiumOnly = builder.premiumOnly;
+		private Builder(final String name, final String itemUrl, final Type type) {
+			this.itemName = name;
+			this.itemUrl = itemUrl;
+			this.itemType = type;
+		}
+
+		public static Builder create(final String name, final String itemUrl, final Type type) {
+			return new Builder(name, itemUrl, type);
+		}
+
+		public InventoryItem build() {
+			return new InventoryItem(this);
+		}
+
+		public Builder setPremium(final boolean premium) {
+			this.premiumOnly = premium;
+			return this;
+		}
+
+		public Builder setRarity(final Rarity rarity) {
+			this.itemRarity = rarity;
+			return this;
+		}
+	}
+	protected enum Rarity {
+		COMMON("common"), UNCOMMON("uncommon"), RARE("rare"), EPIC("epic"), LEGENDARY("legendary"), MYSTICAL("mystical");
+
+		protected final String name;
+
+		Rarity(final String name) {
+			this.name = name;
+		}
+
+		public static Rarity byName(final String name) {
+			try {
+				return Stream.of(Rarity.values()).filter(type -> type.name.equalsIgnoreCase(name)).findFirst().get();
+			} catch (final NoSuchElementException e) {
+				throw new IllegalArgumentException(name + " is not a valid type!");
+			}
+		}
+	}
+
+	protected enum Type {
+		BACKGROUND_IMAGE("bgImg"), OUTLINE_IMAGE("outImg"), XP_BAR_OUTLINE_IMAGE("xpOutImg"),
+		XP_BAR_EMPTY_IMAGE("xpEmptyImg"), XP_BAR_FILL_IMAGE("xpFillImg"), AVATAR_OUTLINE_IMAGE("avatarOutImg"),
+		WRAPPER("wrapper");
+
+		protected final String name;
+
+		Type(final String name) {
+			this.name = name;
+		}
+
+		public static Type byName(final String name) {
+			try {
+				return Stream.of(Type.values()).filter(type -> type.name.equalsIgnoreCase(name)).findFirst().get();
+			} catch (final NoSuchElementException e) {
+				throw new IllegalArgumentException(name + " is not a valid type!");
+			}
+		}
 	}
 }

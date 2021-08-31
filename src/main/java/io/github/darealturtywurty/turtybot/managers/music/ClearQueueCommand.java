@@ -1,35 +1,46 @@
 package io.github.darealturtywurty.turtybot.managers.music;
 
+import java.util.List;
+
 import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
-import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
-import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
+import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
+import io.github.darealturtywurty.turtybot.managers.music.core.MusicManager;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-public class ClearQueueCommand implements IGuildCommand {
+@RegisterBotCmd
+public class ClearQueueCommand implements GuildCommand {
 
-	@Override
-	public CommandCategory getCategory() {
-		return CommandCategory.MUSIC;
-	}
+    @Override
+    public CommandCategory getCategory() {
+        return CommandCategory.MUSIC;
+    }
 
-	@Override
-	public String getDescription() {
-		return "Clears the current music queue!";
-	}
+    @Override
+    public String getDescription() {
+        return "Clears the current music queue!";
+    }
 
-	@Override
-	public String getName() {
-		return "clearqueue";
-	}
+    @Override
+    public String getName() {
+        return "clearqueue";
+    }
 
-	@Override
-	public void handle(final CommandContext ctx) {
-		MusicManager.MUSIC_MANAGERS.get(ctx.getGuild().getIdLong()).scheduler.getQueue().clear();
-		ctx.getGuild().getAudioManager().closeAudioConnection();
-		ctx.getMessage().delete().queue();
-	}
+    @Override
+    public List<OptionData> getOptions() {
+        return List.of();
+    }
 
-	@Override
-	public boolean isModeratorOnly() {
-		return true;
-	}
+    @Override
+    public void handle(final CoreCommandContext ctx) {
+        MusicManager.MUSIC_MANAGERS.get(ctx.getGuild().getIdLong()).scheduler.getQueue().clear();
+        ctx.getGuild().getAudioManager().closeAudioConnection();
+        ctx.getEvent().deferReply().setContent("I have cleared the queue!").queue();
+    }
+
+    @Override
+    public boolean isModeratorOnly() {
+        return true;
+    }
 }

@@ -1,51 +1,56 @@
 package io.github.darealturtywurty.turtybot.managers.music;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
-import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
-import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
+import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
+import io.github.darealturtywurty.turtybot.managers.music.core.MusicManager;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-public class PauseCommand implements IGuildCommand {
+@RegisterBotCmd
+public class PauseCommand implements GuildCommand {
 
-	@Override
-	public CommandCategory getCategory() {
-		return CommandCategory.MUSIC;
-	}
+    @Override
+    public CommandCategory getCategory() {
+        return CommandCategory.MUSIC;
+    }
 
-	@Override
-	public String getDescription() {
-		return "Pauses the currently playing song.";
-	}
+    @Override
+    public String getDescription() {
+        return "Pauses the currently playing song.";
+    }
 
-	@Override
-	public String getName() {
-		return "pause";
-	}
+    @Override
+    public String getName() {
+        return "pause";
+    }
 
-	@Override
-	public void handle(final CommandContext ctx) {
-		final AudioPlayer player = MusicManager.getPlayer(ctx.getGuild());
-		if (!player.isPaused()) {
-			player.setPaused(true);
-			ctx.getMessage().reply("I have paused the music player!").mentionRepliedUser(false).queue(msg -> {
-				ctx.getMessage().delete().queueAfter(15, TimeUnit.SECONDS);
-				msg.delete().queueAfter(15, TimeUnit.SECONDS);
-			});
-			return;
-		}
+    @Override
+    public List<OptionData> getOptions() {
+        return List.of();
+    }
 
-		ctx.getMessage().reply("The music player is already paused. You cannot pause it again!").mentionRepliedUser(false)
-				.queue(msg -> {
-					ctx.getMessage().delete().queueAfter(15, TimeUnit.SECONDS);
-					msg.delete().queueAfter(15, TimeUnit.SECONDS);
-				});
-	}
+    @Override
+    public void handle(final CoreCommandContext ctx) {
+        final AudioPlayer player = MusicManager.getPlayer(ctx.getGuild());
+        if (!player.isPaused()) {
+            player.setPaused(true);
+            ctx.getEvent().deferReply().setContent("I have paused the music player!")
+                    .mentionRepliedUser(false).queue();
+            return;
+        }
 
-	@Override
-	public boolean isModeratorOnly() {
-		return true;
-	}
+        ctx.getEvent().deferReply(true)
+                .setContent("The music player is already paused. You cannot pause it again!")
+                .mentionRepliedUser(false).queue();
+    }
+
+    @Override
+    public boolean isModeratorOnly() {
+        return true;
+    }
 }

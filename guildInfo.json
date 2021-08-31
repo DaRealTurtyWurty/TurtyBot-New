@@ -2,27 +2,14 @@
   {
     "GuildID": 819294753732296776,
     "Prefix": "!",
-    "ModeratorRoleID": 820450911594872902,
-    "ModLogChannelID": 820451030684008499,
-    "AdvancedModderRoleID": 835892413113434132,
-    "MutedRoleID": 849376284085190746,
+    "ModeratorRoleID": 0,
+    "ModLogChannelID": 0,
+    "AdvancedModderRoleID": 0,
+    "MutedRoleID": 0,
     "MuteThreshold": 2,
     "KickThreshold": 3,
     "BanThreshold": 5,
-    "UserWarns": [
-      {
-        "ID": 309776610255437824,
-        "Warns": []
-      },
-      {
-        "ID": 625007388914876439,
-        "Warns": []
-      },
-      {
-        "ID": 537572150819815434,
-        "Warns": []
-      }
-    ],
+    "UserWarns": [],
     "ShowcasesChannelID": 820454246923108352,
     "StarboardChannelID": 0,
     "MinimumStars": 5,
@@ -30,10 +17,10 @@
     "StarboardEnabled": true,
     "StarboardStages": {
       "Stage0": 10,
-      "Stage1": 50,
-      "Stage2": 50,
-      "Stage3": 50,
-      "Stage4": 50,
+      "Stage1": 15,
+      "Stage2": 20,
+      "Stage3": 30,
+      "Stage4": 40,
       "Stage5": 50
     },
     "ShowcaseInfo": []

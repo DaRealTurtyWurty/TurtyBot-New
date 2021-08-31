@@ -1,4 +1,4 @@
-package io.github.darealturtywurty.turtybot.managers.music;
+package io.github.darealturtywurty.turtybot.managers.music.core;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;

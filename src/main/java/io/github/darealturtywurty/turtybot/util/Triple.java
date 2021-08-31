@@ -12,6 +12,14 @@ public class Triple<L, M, R> {
 		this.right = right;
 	}
 
+	public static <L, M, R> Triple<L, M, R> create(L left, M middle, R right) {
+		return new Triple<>(left, middle, right);
+	}
+
+	private static boolean equals(Object obj1, Object obj2) {
+		return (obj1 == null && obj2 == null) || (obj1 != null && obj1.equals(obj2));
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof Triple)) {
@@ -21,17 +29,9 @@ public class Triple<L, M, R> {
 		return left.equals(triple.left) && middle.equals(triple.middle) && right.equals(triple.right);
 	}
 
-	private static boolean equals(Object obj1, Object obj2) {
-		return (obj1 == null && obj2 == null) || (obj1 != null && obj1.equals(obj2));
-	}
-
 	@Override
 	public int hashCode() {
 		return (left == null ? 0 : left.hashCode()) ^ (middle == null ? 0 : middle.hashCode())
 				^ (right == null ? 0 : right.hashCode());
-	}
-
-	public static <L, M, R> Triple<L, M, R> create(L left, M middle, R right) {
-		return new Triple<>(left, middle, right);
 	}
 }

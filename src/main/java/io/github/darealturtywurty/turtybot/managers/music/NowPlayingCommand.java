@@ -1,50 +1,49 @@
 package io.github.darealturtywurty.turtybot.managers.music;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
-import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
-import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
+import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
+import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
+import io.github.darealturtywurty.turtybot.managers.music.core.MusicManager;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-public class NowPlayingCommand implements IGuildCommand {
+@RegisterBotCmd
+public class NowPlayingCommand implements GuildCommand {
 
-	@Override
-	public List<String> getAliases() {
-		return List.of("np", "playing", "current");
-	}
+    @Override
+    public CommandCategory getCategory() {
+        return CommandCategory.MUSIC;
+    }
 
-	@Override
-	public CommandCategory getCategory() {
-		return CommandCategory.MUSIC;
-	}
+    @Override
+    public String getDescription() {
+        return "Gets the currently playing song (if there is one).";
+    }
 
-	@Override
-	public String getDescription() {
-		return "Gets the currently playing song (if there is one).";
-	}
+    @Override
+    public String getName() {
+        return "nowplaying";
+    }
 
-	@Override
-	public String getName() {
-		return "nowplaying";
-	}
+    @Override
+    public List<OptionData> getOptions() {
+        return List.of();
+    }
 
-	@Override
-	public void handle(final CommandContext ctx) {
-		try {
-			ctx.getMessage()
-					.reply("Currently Playing: " + MusicManager.getPlayer(ctx.getGuild()).getPlayingTrack().getInfo().title)
-					.mentionRepliedUser(false).queue();
-		} catch (final Exception ex) {
-			ctx.getMessage()
-					.reply("I am not currently playing anything. Use `" + BotUtils.getPrefixFromGuild(ctx.getGuild())
-							+ "join` in combination with `" + BotUtils.getPrefixFromGuild(ctx.getGuild())
-							+ "play <url>` to play something!")
-					.mentionRepliedUser(false).queue(msg -> {
-						msg.delete().queueAfter(15, TimeUnit.SECONDS);
-						ctx.getMessage().delete().queueAfter(15, TimeUnit.SECONDS);
-					});
-		}
-	}
+    @Override
+    public void handle(final CoreCommandContext ctx) {
+        try {
+            ctx.getEvent().deferReply()
+                    .setContent("Currently Playing: "
+                            + MusicManager.getPlayer(ctx.getGuild()).getPlayingTrack().getInfo().title)
+                    .mentionRepliedUser(false).queue();
+        } catch (final Exception ex) {
+            ctx.getEvent().deferReply(true)
+                    .setContent("I am not currently playing anything. Use `" + "/"
+                            + "join` in combination with `" + "/" + "play <url>` to play something!")
+                    .mentionRepliedUser(false).queue();
+        }
+    }
 }
