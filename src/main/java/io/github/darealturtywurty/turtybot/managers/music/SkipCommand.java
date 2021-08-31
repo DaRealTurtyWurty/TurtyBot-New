@@ -1,33 +1,49 @@
 package io.github.darealturtywurty.turtybot.managers.music;
 
+import java.util.List;
+
 import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
-import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
-import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
+import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
+import io.github.darealturtywurty.turtybot.managers.music.core.MusicManager;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-public class SkipCommand implements IGuildCommand {
+@RegisterBotCmd
+public class SkipCommand implements GuildCommand {
 
-	@Override
-	public CommandCategory getCategory() {
-		return CommandCategory.MUSIC;
-	}
+    @Override
+    public CommandCategory getCategory() {
+        return CommandCategory.MUSIC;
+    }
 
-	@Override
-	public String getDescription() {
-		return "Skips the currently playing song!";
-	}
+    @Override
+    public String getDescription() {
+        return "Skips the currently playing song!";
+    }
 
-	@Override
-	public String getName() {
-		return "skip";
-	}
+    @Override
+    public String getName() {
+        return "skip";
+    }
 
-	@Override
-	public void handle(final CommandContext ctx) {
-		MusicManager.skipTrack(ctx.getChannel());
-	}
+    @Override
+    public List<OptionData> getOptions() {
+        return List.of();
+    }
 
-	@Override
-	public boolean isModeratorOnly() {
-		return true;
-	}
+    @Override
+    public void handle(final CoreCommandContext ctx) {
+        if (MusicManager.getPlayer(ctx.getGuild()).getPlayingTrack() != null) {
+            MusicManager.skipTrack(ctx.getChannel());
+            ctx.getEvent().deferReply().setContent("Skipped ⏭").queue();
+        } else {
+            ctx.getEvent().deferReply(true).setContent("There is no current played song!").queue();
+        }
+    }
+
+    @Override
+    public boolean isModeratorOnly() {
+        return true;
+    }
 }

@@ -21,6 +21,10 @@ public final class ItemRegistry {
 
 	protected static final Map<String, InventoryItem> REGISTRY = new HashMap<>();
 
+	private ItemRegistry() {
+		throw new IllegalAccessError("Attempted to construct registry class!");
+	}
+
 	public static List<InventoryItem> get(final boolean premium) {
 		return REGISTRY.values().stream().filter(i -> i.premiumOnly == premium).collect(Collectors.toList());
 	}
@@ -84,9 +88,5 @@ public final class ItemRegistry {
 			Constants.LOGGER.warning("There was an issue finding any inventory items!");
 			return null;
 		}
-	}
-
-	private ItemRegistry() {
-		throw new IllegalAccessError("Attempted to construct registry class!");
 	}
 }

@@ -1,50 +1,56 @@
 package io.github.darealturtywurty.turtybot.managers.music;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
-import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
-import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
+import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
+import io.github.darealturtywurty.turtybot.managers.music.core.MusicManager;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-public class VolumeCommand implements IGuildCommand {
+@RegisterBotCmd
+public class VolumeCommand implements GuildCommand {
 
-	@Override
-	public CommandCategory getCategory() {
-		return CommandCategory.MUSIC;
-	}
+    @Override
+    public CommandCategory getCategory() {
+        return CommandCategory.MUSIC;
+    }
 
-	@Override
-	public String getDescription() {
-		return "Sets the volume for the music.";
-	}
+    @Override
+    public String getDescription() {
+        return "Sets the volume for the music.";
+    }
 
-	@Override
-	public String getName() {
-		return "volume";
-	}
+    @Override
+    public String getName() {
+        return "volume";
+    }
 
-	@Override
-	public void handle(final CommandContext ctx) {
-		if (ctx.getArgs().length >= 1) {
-			try {
-				MusicManager.getPlayer(ctx.getGuild()).setVolume(Integer.parseInt(ctx.getArgs()[0]));
-			} catch (final NumberFormatException ex) {
-				ctx.getMessage().reply("You must enter a valid volume!").mentionRepliedUser(false).queue(msg -> {
-					msg.delete().queueAfter(15, TimeUnit.SECONDS);
-					ctx.getMessage().delete().queueAfter(15, TimeUnit.SECONDS);
-				});
-			}
-			return;
-		}
+    @Override
+    public List<OptionData> getOptions() {
+        return List.of(new OptionData(OptionType.INTEGER, "volume", "The volume to set the music player to.",
+                false));
+    }
 
-		ctx.getMessage().reply("You must enter a valid volume!").mentionRepliedUser(false).queue(msg -> {
-			msg.delete().queueAfter(15, TimeUnit.SECONDS);
-			ctx.getMessage().delete().queueAfter(15, TimeUnit.SECONDS);
-		});
-	}
+    @Override
+    public void handle(final CoreCommandContext ctx) {
+        final OptionMapping volumeOption = ctx.getEvent().getOption("volume");
+        if (volumeOption != null) {
+            final int newVolume = (int) ctx.getEvent().getOption("volume").getAsLong();
+            MusicManager.getPlayer(ctx.getGuild()).setVolume(newVolume);
+            final int volume = MusicManager.getPlayer(ctx.getGuild()).getVolume();
+            ctx.getEvent().deferReply().setContent("I have changed the volume to: " + volume).queue();
+        } else {
+            final int volume = MusicManager.getPlayer(ctx.getGuild()).getVolume();
+            ctx.getEvent().deferReply(true).setContent("The current volume is: " + volume).queue();
+        }
+    }
 
-	@Override
-	public boolean isModeratorOnly() {
-		return true;
-	}
+    @Override
+    public boolean isBoosterOnly() {
+        return true;
+    }
 }

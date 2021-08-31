@@ -8,15 +8,10 @@ import javax.annotation.Nullable;
 
 public class WeightedRandomBag<T extends Object> {
 
-	private class Entry {
-		double accumulatedWeight;
-		T object;
-	}
-
 	private final List<Entry> entries = new ArrayList<>();
+
 	private double accumulatedWeight;
 	private final Random rand = new Random();
-
 	public void addEntry(final T object, final double weight) {
 		this.accumulatedWeight += weight;
 		final var entry = new Entry();
@@ -34,5 +29,10 @@ public class WeightedRandomBag<T extends Object> {
 				return entry.object;
 		}
 		return null;
+	}
+
+	private class Entry {
+		double accumulatedWeight;
+		T object;
 	}
 }

@@ -1,45 +1,52 @@
 package io.github.darealturtywurty.turtybot.managers.music;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
-import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
-import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
+import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
+import io.github.darealturtywurty.turtybot.managers.music.core.MusicManager;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-public class LeaveCommand implements IGuildCommand {
+@RegisterBotCmd
+public class LeaveCommand implements GuildCommand {
 
-	@Override
-	public CommandCategory getCategory() {
-		return CommandCategory.MUSIC;
-	}
+    @Override
+    public CommandCategory getCategory() {
+        return CommandCategory.MUSIC;
+    }
 
-	@Override
-	public String getDescription() {
-		return "Leaves the voice channel.";
-	}
+    @Override
+    public String getDescription() {
+        return "Leaves the voice channel.";
+    }
 
-	@Override
-	public String getName() {
-		return "leave";
-	}
+    @Override
+    public String getName() {
+        return "leave";
+    }
 
-	@Override
-	public void handle(final CommandContext ctx) {
-		if (ctx.getGuild().getAudioManager().isConnected()) {
-			ctx.getGuild().getAudioManager().closeAudioConnection();
-			MusicManager.MUSIC_MANAGERS.get(ctx.getGuild().getIdLong()).scheduler.getQueue().clear();
-			ctx.getMessage().delete().queue();
-			return;
-		}
+    @Override
+    public List<OptionData> getOptions() {
+        return List.of();
+    }
 
-		ctx.getMessage().reply("I must be in a voice channel to be able to leave!").mentionRepliedUser(false).queue(msg -> {
-			msg.delete().queueAfter(15, TimeUnit.SECONDS);
-			ctx.getMessage().delete().queueAfter(15, TimeUnit.SECONDS);
-		});
-	}
+    @Override
+    public void handle(final CoreCommandContext ctx) {
+        if (ctx.getGuild().getAudioManager().isConnected()) {
+            ctx.getGuild().getAudioManager().closeAudioConnection();
+            MusicManager.MUSIC_MANAGERS.get(ctx.getGuild().getIdLong()).scheduler.getQueue().clear();
+            ctx.getEvent().deferReply().setContent("I have left the voice channel. 😢").queue();
+            return;
+        }
 
-	@Override
-	public boolean isModeratorOnly() {
-		return true;
-	}
+        ctx.getEvent().deferReply(true).setContent("I must be in a voice channel to be able to leave!")
+                .mentionRepliedUser(false).queue();
+    }
+
+    @Override
+    public boolean isModeratorOnly() {
+        return true;
+    }
 }

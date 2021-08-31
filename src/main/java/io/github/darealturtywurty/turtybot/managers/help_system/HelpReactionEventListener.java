@@ -12,13 +12,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class HelpReactionEventListener extends ListenerAdapter {
 
-	protected static boolean shouldIgnoreMember(final TextChannel channel, final Member member) {
-		final var advancedModder = BotUtils.getAdvModderRole(channel.getGuild());
-		return BotUtils.isModerator(channel.getGuild(), member)
-				|| channel.getTopic().split("\n")[0].toLowerCase().trim().equalsIgnoreCase(member.getId())
-				|| member.getRoles().contains(advancedModder) || member.getUser().isBot() || member.isPending();
-	}
-
 	private final TextChannel helpChannel;
 
 	private final long messageID;
@@ -26,6 +19,13 @@ public class HelpReactionEventListener extends ListenerAdapter {
 	public HelpReactionEventListener(final TextChannel channel, final long messageID) {
 		this.helpChannel = channel;
 		this.messageID = messageID;
+	}
+
+	protected static boolean shouldIgnoreMember(final TextChannel channel, final Member member) {
+		final var advancedModder = BotUtils.getAdvModderRole(channel.getGuild());
+		return BotUtils.isModerator(channel.getGuild(), member)
+				|| channel.getTopic().split("\n")[0].toLowerCase().trim().equalsIgnoreCase(member.getId())
+				|| member.getRoles().contains(advancedModder) || member.getUser().isBot() || member.isPending();
 	}
 
 	@Override

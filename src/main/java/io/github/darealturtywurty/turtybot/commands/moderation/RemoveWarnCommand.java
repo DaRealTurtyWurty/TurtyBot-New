@@ -1,57 +1,51 @@
 package io.github.darealturtywurty.turtybot.commands.moderation;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
-import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
-import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
+import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
 import io.github.darealturtywurty.turtybot.util.BotUtils.WarnUtils;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-public class RemoveWarnCommand implements IGuildCommand {
+@RegisterBotCmd
+public class RemoveWarnCommand implements GuildCommand {
 
-	@Override
-	public List<String> getAliases() {
-		return Arrays.asList("delwarn", "deletewarn", "remwarn", "destroywarn");
-	}
+    @Override
+    public CommandCategory getCategory() {
+        return CommandCategory.MODERATION;
+    }
 
-	@Override
-	public CommandCategory getCategory() {
-		return CommandCategory.MODERATION;
-	}
+    @Override
+    public String getDescription() {
+        return "Removes the warn with a specific UUID from a user.";
+    }
 
-	@Override
-	public String getDescription() {
-		return "Removes the warn with a specific UUID from a user.";
-	}
+    @Override
+    public String getName() {
+        return "removewarn";
+    }
 
-	@Override
-	public String getName() {
-		return "removewarn";
-	}
+    @Override
+    public List<OptionData> getOptions() {
+        return List.of(new OptionData(OptionType.STRING, "uuid", "UUID of the warn", true));
+    }
 
-	@Override
-	public void handle(final CommandContext ctx) {
-		if (ctx.getArgs().length < 1) {
-			ctx.getMessage().reply("You must supply the UUID of the warn that you wish to remove!").mentionRepliedUser(false)
-					.queue();
-			return;
-		}
+    @Override
+    public void handle(final CoreCommandContext ctx) {
+        final String uuid = ctx.getEvent().getOption("uuid").getAsString();
 
-		final boolean complete = WarnUtils.removeWarnByUUID(ctx.getGuild(), ctx.getMember(), ctx.getArgs()[0]);
-		if (!complete) {
-			ctx.getMessage().reply("You must provide a valid UUID.").mentionRepliedUser(false).queue(msg -> {
-				msg.delete().queueAfter(30, TimeUnit.SECONDS);
-				ctx.getMessage().delete().queueAfter(30, TimeUnit.SECONDS);
-			});
-		} else {
-			ctx.getMessage().delete().queue();
-		}
-	}
+        final boolean complete = WarnUtils.removeWarnByUUID(ctx.getGuild(), ctx.getMember(), uuid);
+        if (!complete) {
+            ctx.getEvent().deferReply(true).setContent("You must provide a valid UUID.")
+                    .mentionRepliedUser(false).queue();
+        }
+    }
 
-	@Override
-	public boolean isModeratorOnly() {
-		return true;
-	}
+    @Override
+    public boolean isModeratorOnly() {
+        return true;
+    }
 }

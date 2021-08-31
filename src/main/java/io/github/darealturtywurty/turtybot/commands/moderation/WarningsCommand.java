@@ -1,74 +1,74 @@
 package io.github.darealturtywurty.turtybot.commands.moderation;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
-import io.github.darealturtywurty.turtybot.commands.core.CommandContext;
-import io.github.darealturtywurty.turtybot.commands.core.IGuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
+import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
+import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
 import io.github.darealturtywurty.turtybot.util.BotUtils.WarnUtils;
 import io.github.darealturtywurty.turtybot.util.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-public class WarningsCommand implements IGuildCommand {
+@RegisterBotCmd
+public class WarningsCommand implements GuildCommand {
 
-	@Override
-	public List<String> getAliases() {
-		return Arrays.asList("history", "warns", "warnhistory", "allwarns");
-	}
+    @Override
+    public CommandCategory getCategory() {
+        return CommandCategory.MODERATION;
+    }
 
-	@Override
-	public CommandCategory getCategory() {
-		return CommandCategory.MODERATION;
-	}
+    @Override
+    public String getDescription() {
+        return "Lists all the warnings for a user.";
+    }
 
-	@Override
-	public String getDescription() {
-		return "Lists all the warnings for a user.";
-	}
+    @Override
+    public String getName() {
+        return "warnings";
+    }
 
-	@Override
-	public String getName() {
-		return "warnings";
-	}
+    @Override
+    public List<OptionData> getOptions() {
+        return List.of(new OptionData(OptionType.USER, "user", "User to get warnings for", false));
+    }
 
-	@Override
-	public void handle(final CommandContext ctx) {
-		final var message = ctx.getMessage();
-		final var guild = ctx.getGuild();
-		Member toGet = null;
-		if (ctx.getArgs().length >= 1) {
-			final String toGetStr = ctx.getArgs()[0];
+    @Override
+    public void handle(final CoreCommandContext ctx) {
+        final var guild = ctx.getGuild();
+        final OptionMapping userOption = ctx.getEvent().getOption("user");
+        User toGetUser = null;
+        Member toGetMember = null;
 
-			try {
-				toGet = message.getMentionedMembers().get(0);
-			} catch (final IndexOutOfBoundsException ex) {
-				guild.retrieveMemberById(toGetStr).queue();
-				toGet = guild.getMemberById(toGetStr);
-			}
+        if (userOption == null) {
+            toGetUser = ctx.getAuthor();
+            toGetMember = ctx.getMember();
+        } else {
+            toGetUser = userOption.getAsUser();
+            toGetMember = userOption.getAsMember();
+        }
 
-			if (toGet == null) {
-				message.reply("Could not find user: " + toGetStr).mentionRepliedUser(false).queue();
-				return;
-			}
-		} else {
-			toGet = guild.getMemberById(message.getAuthor().getIdLong());
-		}
+        final var userWarns = WarnUtils.getUserWarns(guild, toGetUser);
+        final var warnsEmbed = new EmbedBuilder()
+                .setColor(toGetMember != null ? toGetMember.getColorRaw() : 0xFFFFFF)
+                .setTitle("Warnings for: " + toGetMember != null ? toGetMember.getEffectiveName()
+                        : toGetUser.getName())
+                .setDescription(toGetMember != null ? toGetMember.getEffectiveName()
+                        : toGetUser.getName() + " has " + userWarns.getNumberWarns() + " warnings!")
+                .setTimestamp(Instant.now());
+        final var counter = new AtomicInteger(1);
+        userWarns.warns.forEach((uuid, warnInfo) -> warnsEmbed.addField(counter.getAndIncrement() + ".",
+                "**UUID:** " + uuid.toString() + "\n**Warned By (ID):** " + warnInfo.left + "\n**Date:** "
+                        + Constants.DATE_FORMAT.format(warnInfo.middle) + "\n**Reason:** " + warnInfo.right,
+                false));
 
-		final var userWarns = WarnUtils.getUserWarns(guild, toGet);
-		final var warnsEmbed = new EmbedBuilder().setColor(toGet.getColorRaw())
-				.setTitle("Warnings for: " + toGet.getEffectiveName())
-				.setDescription(toGet.getEffectiveName() + " has " + userWarns.getNumberWarns() + " warnings!")
-				.setTimestamp(Instant.now());
-		final var counter = new AtomicInteger(1);
-		userWarns.warns.forEach((uuid, warnInfo) -> warnsEmbed.addField(
-				counter.getAndIncrement() + ".", "**UUID:** " + uuid.toString() + "\n**Warned By (ID):** " + warnInfo.left
-						+ "\n**Date:** " + Constants.DATE_FORMAT.format(warnInfo.middle) + "\n**Reason:** " + warnInfo.right,
-				false));
-
-		message.replyEmbeds(warnsEmbed.build()).mentionRepliedUser(false).queue();
-	}
+        ctx.getEvent().deferReply().addEmbeds(warnsEmbed.build()).mentionRepliedUser(false).queue();
+    }
 }

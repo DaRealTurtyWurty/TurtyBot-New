@@ -3,11 +3,11 @@ package io.github.darealturtywurty.turtybot.managers.starboard;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 
-import io.github.darealturtywurty.turtybot.data.GuildInfo;
-import io.github.darealturtywurty.turtybot.data.ShowcaseInfo;
 import io.github.darealturtywurty.turtybot.util.BotUtils.CoreBotUtils;
 import io.github.darealturtywurty.turtybot.util.BotUtils.StarboardUtils;
 import io.github.darealturtywurty.turtybot.util.Constants;
+import io.github.darealturtywurty.turtybot.util.data.GuildInfo;
+import io.github.darealturtywurty.turtybot.util.data.ShowcaseInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
@@ -17,10 +17,6 @@ import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemove
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class StarboardManager extends ListenerAdapter {
-
-	private static GuildInfo getOrCreateGuildInfo(final Guild guild) {
-		return CoreBotUtils.GUILDS.get(guild) == null ? new GuildInfo(guild) : CoreBotUtils.GUILDS.get(guild);
-	}
 
 	public static ShowcaseInfo getOrCreateShowcaseInfo(final GuildInfo guildInfo, final long messageID) {
 		final boolean exists = guildInfo.showcaseInfos.containsKey(messageID);
@@ -88,6 +84,10 @@ public class StarboardManager extends ListenerAdapter {
 		showcaseInfo.starboardMessageID = starboardMsgID;
 		CoreBotUtils.GUILDS.put(guild, guildInfo);
 		CoreBotUtils.writeGuildInfo();
+	}
+
+	private static GuildInfo getOrCreateGuildInfo(final Guild guild) {
+		return CoreBotUtils.GUILDS.get(guild) == null ? new GuildInfo(guild) : CoreBotUtils.GUILDS.get(guild);
 	}
 
 	@Override

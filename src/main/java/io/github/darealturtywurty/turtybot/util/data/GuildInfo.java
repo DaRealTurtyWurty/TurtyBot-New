@@ -1,4 +1,4 @@
-package io.github.darealturtywurty.turtybot.data;
+package io.github.darealturtywurty.turtybot.util.data;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package io.github.darealturtywurty.turtybot.managers.music;
+package io.github.darealturtywurty.turtybot.managers.music.core;
 
 import java.nio.ByteBuffer;
 

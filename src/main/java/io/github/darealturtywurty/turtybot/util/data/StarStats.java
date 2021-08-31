@@ -1,4 +1,4 @@
-package io.github.darealturtywurty.turtybot.data;
+package io.github.darealturtywurty.turtybot.util.data;
 
 import io.github.darealturtywurty.turtybot.managers.starboard.StarboardManager;
 import io.github.darealturtywurty.turtybot.util.BotUtils.CoreBotUtils;
@@ -6,17 +6,17 @@ import net.dv8tion.jda.api.entities.Guild;
 
 public class StarStats {
 
-	private static GuildInfo getOrCreateGuildInfo(final Guild guild) {
-		return CoreBotUtils.GUILDS.get(guild) == null ? new GuildInfo(guild) : CoreBotUtils.GUILDS.get(guild);
-	}
-
 	public final long userID;
-	private int totalStars;
 
+	private int totalStars;
 	public int otherStars;
 
 	public StarStats(final long userID) {
 		this.userID = userID;
+	}
+
+	private static GuildInfo getOrCreateGuildInfo(final Guild guild) {
+		return CoreBotUtils.GUILDS.get(guild) == null ? new GuildInfo(guild) : CoreBotUtils.GUILDS.get(guild);
 	}
 
 	/**

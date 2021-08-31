@@ -26,30 +26,10 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class AutoModerator extends ListenerAdapter {
 
-	private static class FileReadException extends RuntimeException {
-		private static final long serialVersionUID = -6780037474145653723L;
-
-		private final String message;
-
-		public FileReadException(final String message) {
-			this.message = message;
-		}
-
-		@Override
-		public String getLocalizedMessage() {
-			return this.message;
-		}
-
-		@Override
-		public String getMessage() {
-			return this.message;
-		}
-	}
-
 	public static final Set<Long> USER_MUTE_MAP = new HashSet<>();
+
 	private static final Set<String> BANNED_WORDS = new HashSet<>();
 	private static final Map<Character, String> CHAR_REPLACEMENT_MAP = new HashMap<>();
-
 	static {
 		final String[] toIgnore = { "fuck", "shit", "bitch", "ass", "barely legal", "butt", "buttcheeks", "dick", "horny",
 				"make me come", "nsfw", "nude", "pissing", "sexuality", "sexual", "sexually", "suck", "taste my",
@@ -194,5 +174,25 @@ public class AutoModerator extends ListenerAdapter {
 			badWordFilter(event.getMessage());
 		}
 		discordDetection(event.getMessage());
+	}
+
+	private static class FileReadException extends RuntimeException {
+		private static final long serialVersionUID = -6780037474145653723L;
+
+		private final String message;
+
+		public FileReadException(final String message) {
+			this.message = message;
+		}
+
+		@Override
+		public String getLocalizedMessage() {
+			return this.message;
+		}
+
+		@Override
+		public String getMessage() {
+			return this.message;
+		}
 	}
 }
