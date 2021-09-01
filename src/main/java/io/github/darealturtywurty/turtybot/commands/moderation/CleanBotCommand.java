@@ -6,12 +6,13 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.WarnUtils;
+import io.github.darealturtywurty.turtybot.managers.auto_mod.BotResponseListener;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 @RegisterBotCmd
-public class RemoveWarnCommand implements GuildCommand {
+public class CleanBotCommand implements GuildCommand {
 
     @Override
     public CommandCategory getCategory() {
@@ -20,32 +21,27 @@ public class RemoveWarnCommand implements GuildCommand {
 
     @Override
     public String getDescription() {
-        return "Removes the warn with a specific UUID from a user.";
+        return "Cleans the bot responses in the current channel.";
     }
 
     @Override
     public String getName() {
-        return "removewarn";
+        return "clean-bot";
     }
 
     @Override
     public List<OptionData> getOptions() {
-        return List.of(new OptionData(OptionType.STRING, "uuid", "UUID of the warn", true));
+        return List.of(new OptionData(OptionType.INTEGER, "amount", "1-100", false));
     }
 
     @Override
     public void handle(final CoreCommandContext ctx) {
-        final String uuid = ctx.getEvent().getOption("uuid").getAsString();
-
-        final boolean complete = WarnUtils.removeWarnByUUID(ctx.getGuild(), ctx.getMember(), uuid);
-        if (!complete) {
-            ctx.getEvent().deferReply(true).setContent("You must provide a valid UUID.")
-                    .mentionRepliedUser(false).queue();
+        int amount = 50;
+        final OptionMapping amountOption = ctx.getEvent().getOption("amount");
+        if (amountOption != null) {
+            amount = Math.max(1, Math.min(100, (int) amountOption.getAsLong()));
         }
-    }
 
-    @Override
-    public boolean isModeratorOnly() {
-        return true;
+        BotResponseListener.cleanResponses(ctx.getChannel(), amount);
     }
 }

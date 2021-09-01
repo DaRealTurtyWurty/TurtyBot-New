@@ -14,7 +14,7 @@ import io.github.darealturtywurty.turtybot.commands.moderation.KickCommand;
 import io.github.darealturtywurty.turtybot.commands.moderation.MuteCommand;
 import io.github.darealturtywurty.turtybot.commands.moderation.UnbanCommand;
 import io.github.darealturtywurty.turtybot.util.BotUtils;
-import io.github.darealturtywurty.turtybot.util.BotUtils.CoreBotUtils;
+import io.github.darealturtywurty.turtybot.util.CoreBotUtils;
 import io.github.darealturtywurty.turtybot.util.Triple;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;

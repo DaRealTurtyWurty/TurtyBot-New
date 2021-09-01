@@ -7,7 +7,7 @@ import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
 import io.github.darealturtywurty.turtybot.util.BotUtils;
-import io.github.darealturtywurty.turtybot.util.BotUtils.WarnUtils;
+import io.github.darealturtywurty.turtybot.util.WarnUtils;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;

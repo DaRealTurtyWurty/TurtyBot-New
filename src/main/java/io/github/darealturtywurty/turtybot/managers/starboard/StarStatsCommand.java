@@ -8,7 +8,7 @@ import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
 import io.github.darealturtywurty.turtybot.util.BotUtils;
-import io.github.darealturtywurty.turtybot.util.BotUtils.CoreBotUtils;
+import io.github.darealturtywurty.turtybot.util.CoreBotUtils;
 import io.github.darealturtywurty.turtybot.util.data.GuildInfo;
 import io.github.darealturtywurty.turtybot.util.data.StarStats;
 import net.dv8tion.jda.api.EmbedBuilder;

@@ -1,7 +1,7 @@
 package io.github.darealturtywurty.turtybot.util.data;
 
 import io.github.darealturtywurty.turtybot.managers.starboard.StarboardManager;
-import io.github.darealturtywurty.turtybot.util.BotUtils.CoreBotUtils;
+import io.github.darealturtywurty.turtybot.util.CoreBotUtils;
 import net.dv8tion.jda.api.entities.Guild;
 
 public class StarStats {

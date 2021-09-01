@@ -16,8 +16,8 @@ import org.apache.commons.io.IOUtils;
 
 import io.github.darealturtywurty.turtybot.commands.moderation.MuteCommand;
 import io.github.darealturtywurty.turtybot.util.BotUtils;
-import io.github.darealturtywurty.turtybot.util.BotUtils.WarnUtils;
 import io.github.darealturtywurty.turtybot.util.Constants;
+import io.github.darealturtywurty.turtybot.util.WarnUtils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;

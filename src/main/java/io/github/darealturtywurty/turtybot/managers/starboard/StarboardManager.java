@@ -3,9 +3,9 @@ package io.github.darealturtywurty.turtybot.managers.starboard;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 
-import io.github.darealturtywurty.turtybot.util.BotUtils.CoreBotUtils;
-import io.github.darealturtywurty.turtybot.util.BotUtils.StarboardUtils;
 import io.github.darealturtywurty.turtybot.util.Constants;
+import io.github.darealturtywurty.turtybot.util.CoreBotUtils;
+import io.github.darealturtywurty.turtybot.util.StarboardUtils;
 import io.github.darealturtywurty.turtybot.util.data.GuildInfo;
 import io.github.darealturtywurty.turtybot.util.data.ShowcaseInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
