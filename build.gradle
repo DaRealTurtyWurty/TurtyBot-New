@@ -16,7 +16,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     
-    implementation group: 'net.dv8tion', name: 'JDA', version: '4.3.0_285'
+    implementation group: 'net.dv8tion', name: 'JDA', version: '4.3.0_314'
     
     implementation group: 'com.typesafe', name: 'config', version: '1.4.1'
     
@@ -45,4 +45,8 @@ dependencies {
 	implementation group: 'com.graphql-java', name: 'graphql-java', version: '17.0'
 	
 	implementation group: 'org.reflections', name: 'reflections', version: '0.9.12'
+	
+	implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.0'
+	
+	implementation group: 'com.jhlabs', name: 'filters', version: '2.0.235-1'
 }
