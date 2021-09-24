@@ -7,3 +7,6 @@ build/
 bin/
 application.conf
 *.class
+
+#IntelliJ
+.idea/
