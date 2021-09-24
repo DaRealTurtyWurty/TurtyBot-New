@@ -2,6 +2,157 @@
   {
     "GuildID": 819294753732296776,
     "Prefix": "!",
+    "ModeratorRoleID": 820450911594872902,
+    "ModLogChannelID": 888763674184011836,
+    "AdvancedModderRoleID": 835892413113434132,
+    "MutedRoleID": 849376284085190746,
+    "MuteThreshold": 2,
+    "KickThreshold": 3,
+    "BanThreshold": 5,
+    "UserWarns": [
+      {
+        "ID": 510607876457496587,
+        "Warns": []
+      },
+      {
+        "ID": 578055504362864661,
+        "Warns": []
+      }
+    ],
+    "ShowcasesChannelID": 888750658306580490,
+    "StarboardChannelID": 888750572075888660,
+    "MinimumStars": 5,
+    "ShouldIncludeBotStar": false,
+    "StarboardEnabled": true,
+    "StarboardStages": {
+      "Stage0": 10,
+      "Stage1": 50,
+      "Stage2": 50,
+      "Stage3": 50,
+      "Stage4": 50,
+      "Stage5": 50
+    },
+    "ShowcaseInfo": [
+      {
+        "OriginalMessageID": 888932282675650631,
+        "StarCount": 4,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888805970518622278,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888806450825150515,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888809563720142918,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888805718336077864,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888805910376480858,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888807376768102500,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888807362989793290,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888806465731690526,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888806375331860490,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888805679098388500,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888764334216458262,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888809586776219710,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888805714099859476,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888805785507889222,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888809466345160704,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888805694789255229,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888806487751815268,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888809405875884062,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888807110341714000,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888805879963594772,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888809579054506066,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      },
+      {
+        "OriginalMessageID": 888806401051340830,
+        "StarCount": 0,
+        "StarboardMessageID": 0
+      }
+    ]
+  },
+  {
+    "GuildID": 621352915034177566,
+    "Prefix": "!",
     "ModeratorRoleID": 0,
     "ModLogChannelID": 0,
     "AdvancedModderRoleID": 0,
@@ -10,17 +161,17 @@
     "KickThreshold": 3,
     "BanThreshold": 5,
     "UserWarns": [],
-    "ShowcasesChannelID": 820454246923108352,
+    "ShowcasesChannelID": 0,
     "StarboardChannelID": 0,
     "MinimumStars": 5,
     "ShouldIncludeBotStar": false,
     "StarboardEnabled": true,
     "StarboardStages": {
       "Stage0": 10,
-      "Stage1": 15,
-      "Stage2": 20,
-      "Stage3": 30,
-      "Stage4": 40,
+      "Stage1": 50,
+      "Stage2": 50,
+      "Stage3": 50,
+      "Stage4": 50,
       "Stage5": 50
     },
     "ShowcaseInfo": []
