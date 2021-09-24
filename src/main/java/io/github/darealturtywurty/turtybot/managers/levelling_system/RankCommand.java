@@ -10,6 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.awt.TexturePaint;
+import java.awt.Transparency;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
@@ -378,7 +379,8 @@ public class RankCommand implements GuildCommand {
             graphics.drawString(String.valueOf(xpPercent) + "%", 510, 230);
 
             // User Avatar
-            final BufferedImage userAvatar = ImageIO.read(new URL(member.getUser().getEffectiveAvatarUrl()));
+            BufferedImage userAvatar = ImageIO.read(new URL(member.getUser().getEffectiveAvatarUrl()));
+            userAvatar = resize(userAvatar, 128);
 
             if (!card.avatarOutlineImage.isBlank() && (member.getTimeBoosted() != null || member.isOwner()
                     || member.getGuild().getIdLong() == 819294753732296776L)) {
@@ -409,5 +411,34 @@ public class RankCommand implements GuildCommand {
             e.printStackTrace();
         }
         return location;
+    }
+
+    /**
+     * Takes a BufferedImage and resizes it according to the provided targetSize
+     *
+     * @param src        the source BufferedImage
+     * @param targetSize maximum height (if portrait) or width (if landscape)
+     * @return a resized version of the provided BufferedImage
+     */
+    private BufferedImage resize(final BufferedImage src, final int targetSize) {
+        if (targetSize <= 0)
+            return src;
+        int targetWidth = targetSize;
+        int targetHeight = targetSize;
+        final float ratio = (float) src.getHeight() / (float) src.getWidth();
+        if (ratio <= 1) { // square or landscape-oriented image
+            targetHeight = (int) Math.ceil(targetWidth * ratio);
+        } else { // portrait image
+            targetWidth = Math.round(targetHeight / ratio);
+        }
+
+        final BufferedImage retImg = new BufferedImage(targetWidth, targetHeight,
+                src.getTransparency() == Transparency.OPAQUE ? BufferedImage.TYPE_INT_RGB
+                        : BufferedImage.TYPE_INT_ARGB);
+        final Graphics2D g2d = retImg.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.drawImage(src, 0, 0, targetWidth, targetHeight, null);
+        g2d.dispose();
+        return retImg;
     }
 }
