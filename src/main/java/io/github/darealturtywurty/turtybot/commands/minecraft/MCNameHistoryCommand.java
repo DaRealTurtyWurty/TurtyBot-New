@@ -7,16 +7,16 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.StreamSupport;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.IOUtils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
@@ -62,31 +62,37 @@ public class MCNameHistoryCommand implements GuildCommand {
                     "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
             final String result = IOUtils
                     .toString(new BufferedReader(new InputStreamReader(urlc.getInputStream())));
-            final JsonArray array = Constants.GSON.fromJson(result, JsonArray.class).getAsJsonArray();
+            final JsonArray usernames = Constants.GSON.fromJson(result, JsonArray.class).getAsJsonArray();
 
+            System.out.println(usernames.get(0).getAsJsonObject());
             final var embed = new EmbedBuilder();
             embed.setTitle("Minecraft Name History for user: "
-                    + array.get(0).getAsJsonObject().get("name").getAsString());
+                    + usernames.get(0).getAsJsonObject().get("name").getAsString());
             embed.setTimestamp(Instant.now());
             embed.setColor(ctx.getMember().getColorRaw());
-            StreamSupport
-                    .stream(array.spliterator(), false).map(
-                            JsonElement::getAsJsonObject)
-                    .forEachOrdered(
-                            object -> embed
-                                    .addField("1.",
-                                            "Name: " + object.get("name").getAsString()
-                                                    + (object.has("changedToAt")
-                                                            ? "\n" + DateFormat.getDateTimeInstance()
-                                                                    .format(new Date(object.get("changedToAt")
-                                                                            .getAsLong()))
-                                                            : ""),
-                                            false));
+            final AtomicInteger counter = new AtomicInteger(1);
+            for (final JsonElement elem : usernames) {
+                if (elem instanceof final JsonObject object) {
+                    final String name = object.get("name").getAsString();
+                    String changeDate = "";
+                    if (object.has("changedToAt")) {
+                        changeDate = "\n" + Constants.DATE_FORMAT
+                                .format(new Date(object.get("changedToAt").getAsLong()));
+                    }
+
+                    embed.addField(counter.getAndIncrement() + ".", "Name: " + name + changeDate, false);
+                }
+            }
             ctx.getEvent().deferReply().addEmbeds(embed.build()).mentionRepliedUser(false).queue();
         } catch (final IOException e) {
             ctx.getEvent().deferReply()
                     .setContent("There was an issue getting the name history for this user!")
                     .mentionRepliedUser(false).queue();
         }
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 }

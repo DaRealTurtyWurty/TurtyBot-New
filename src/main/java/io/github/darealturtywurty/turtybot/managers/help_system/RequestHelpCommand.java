@@ -62,7 +62,7 @@ public class RequestHelpCommand implements GuildCommand {
                                     ctx.getAuthor().getName() + "-" + ctx.getAuthor().getDiscriminator(),
                                     true)
                             .get(0);
-                    ctx.getEvent().deferReply(true).setContent(
+                    channel.sendMessage(
                             "Please provide a detailed description of your problem, what you have tried "
                                     + "and what your aim is. You do not need to provide any logs or images/videos as of this stage.")
                             .queue();
@@ -70,12 +70,15 @@ public class RequestHelpCommand implements GuildCommand {
                 }
             };
 
-            timer.schedule(timerTask, 10000);
+            timer.schedule(timerTask, 5000);
+            ctx.getEvent().deferReply(true).setContent("Your help channel has been created!").queue();
             return;
         }
 
         ctx.getAuthor().openPrivateChannel().queue(channel -> channel
-                .sendMessage("You cannot open a help channel, you already have one open!").queue());
+                .sendMessage("You cannot open a help channel, you already have one open!").queue(msg -> {
+                }, error -> ctx.getEvent().deferReply(true).setContent("You already have a channel open!")
+                        .queue()));
     }
 
     @Override

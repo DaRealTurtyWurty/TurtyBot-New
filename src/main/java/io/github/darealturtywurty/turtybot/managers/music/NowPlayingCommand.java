@@ -46,4 +46,9 @@ public class NowPlayingCommand implements GuildCommand {
                     .mentionRepliedUser(false).queue();
         }
     }
+
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
 }

@@ -11,7 +11,7 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -105,12 +105,17 @@ public class BanCommand implements GuildCommand {
         banLogEmbed.setThumbnail(user.getEffectiveAvatarUrl());
 
         BotUtils.getModLogChannel(guild).sendMessageEmbeds(banLogEmbed.build())
-                .queue(msg -> guild.ban(user, deleteDays.get(), reason));
+                .queue(msg -> guild.ban(user, deleteDays.get(), reason).queue());
         ctx.getEvent().deferReply(true).setContent("User was successfully banned!").queue();
     }
 
     @Override
     public boolean isModeratorOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean productionReady() {
         return true;
     }
 }

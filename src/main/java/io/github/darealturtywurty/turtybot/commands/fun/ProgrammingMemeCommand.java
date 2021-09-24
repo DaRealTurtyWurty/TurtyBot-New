@@ -37,4 +37,9 @@ public class ProgrammingMemeCommand extends BaseRedditCommand {
     public Set<String> getSubreddits() {
         return Sets.newHashSet("ProgrammerHumor", "programmingmemes");
     }
+
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
 }

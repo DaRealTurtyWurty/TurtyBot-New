@@ -46,4 +46,9 @@ public class SkipCommand implements GuildCommand {
     public boolean isModeratorOnly() {
         return true;
     }
+
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
 }

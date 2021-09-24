@@ -8,7 +8,7 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 @RegisterBotCmd
@@ -47,6 +47,11 @@ public class RestartCommand implements GuildCommand {
 
     @Override
     public boolean isBotOwnerOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean productionReady() {
         return true;
     }
 }

@@ -41,7 +41,7 @@ public class RemoveCommand implements GuildCommand {
     @Override
     public void handle(final CoreCommandContext ctx) {
         final String toRemoveStr = ctx.getEvent().getOption("to_remove").getAsString();
-        final var scheduler = MusicManager.MUSIC_MANAGERS.get(ctx.getGuild().getIdLong()).scheduler;
+        final var scheduler = MusicManager.getMusicManager(ctx.getGuild()).scheduler;
         final var tracks = new ArrayList<AudioTrack>(scheduler.getQueue());
         scheduler.getQueue().clear();
         try {
@@ -76,6 +76,11 @@ public class RemoveCommand implements GuildCommand {
 
     @Override
     public boolean isModeratorOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean productionReady() {
         return true;
     }
 }

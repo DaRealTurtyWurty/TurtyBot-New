@@ -12,8 +12,8 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 @RegisterBotCmd
 public class UpsideDownTextCommand implements GuildCommand {
 
-    private static final String NORMAL_CHARS = "abcdefghijklmnopqrstuvwxyz_,;.?!/\\'";
-    private static final String UPSIDEDOWN_CHARS = "ɐqɔpǝɟbɥıظʞןɯuodbɹsʇnʌʍxʎz‾'؛˙¿¡/\\\\,";
+    private static final String NORMAL_CHARS = "abcdefghijklmnopqrstuvwxyz_,;.?!/\\'ABCDEFGHIJKLMNOPQRSTUVWXYZ'˙/[]-=`1234567890~@#$%^&*()‾_+{}|:\"<>";
+    private static final String UPSIDEDOWN_CHARS = "ɐqɔpǝɟƃɥıɾʞןɯuodbɹsʇnʌʍxʎz‾'؛˙¿¡/,∀𐐒Ɔ◖ƎℲ⅁HIſ⋊˥WNOԀΌᴚS⊥∩ΛMX⅄Z,.][-=,ƖᄅƐㄣϛ9ㄥ860~@#$%^⅋*)(_‾+}{|:„><";
 
     @Override
     public CommandCategory getCategory() {
@@ -44,6 +44,12 @@ public class UpsideDownTextCommand implements GuildCommand {
             final int normalIndex = NORMAL_CHARS.indexOf(letter);
             newText.append(normalIndex != -1 ? UPSIDEDOWN_CHARS.charAt(normalIndex) : letter);
         }
-        ctx.getEvent().deferReply().setContent(newText.toString()).mentionRepliedUser(false).queue();
+        ctx.getEvent().deferReply().setContent(newText.reverse().toString()).mentionRepliedUser(false)
+                .queue();
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 }

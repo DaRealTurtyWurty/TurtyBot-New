@@ -34,13 +34,18 @@ public class ClearQueueCommand implements GuildCommand {
 
     @Override
     public void handle(final CoreCommandContext ctx) {
-        MusicManager.MUSIC_MANAGERS.get(ctx.getGuild().getIdLong()).scheduler.getQueue().clear();
+        MusicManager.getMusicManager(ctx.getGuild()).scheduler.getQueue().clear();
         ctx.getGuild().getAudioManager().closeAudioConnection();
         ctx.getEvent().deferReply().setContent("I have cleared the queue!").queue();
     }
 
     @Override
     public boolean isModeratorOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean productionReady() {
         return true;
     }
 }

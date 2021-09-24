@@ -12,8 +12,8 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
 import io.github.darealturtywurty.turtybot.util.Constants;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -75,5 +75,10 @@ public class UrbanDictionaryCommand implements GuildCommand {
             ctx.getEvent().deferReply().setContent("There was an issue accessing the database.")
                     .mentionRepliedUser(false).queue();
         }
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 }

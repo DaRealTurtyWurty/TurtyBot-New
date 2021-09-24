@@ -22,14 +22,16 @@ public class InternetRuleCommand implements GuildCommand {
     protected static final List<String> RULES = new ArrayList<>();
 
     public InternetRuleCommand() {
-        final InputStream stream = TurtyBot.class.getResourceAsStream("/rules_of_the_internet.txt");
-        try {
-            final var reader = new BufferedReader(new InputStreamReader(stream));
-            if (reader.ready()) {
-                reader.lines().forEach(RULES::add);
+        if (RULES.isEmpty()) {
+            final InputStream stream = TurtyBot.class.getResourceAsStream("/rules_of_the_internet.txt");
+            try {
+                final var reader = new BufferedReader(new InputStreamReader(stream));
+                if (reader.ready()) {
+                    reader.lines().forEach(RULES::add);
+                }
+            } catch (final Exception e) {
+                Constants.LOGGER.log(Level.WARNING, "There has been an issue parsing file: {0}", stream);
             }
-        } catch (final Exception e) {
-            Constants.LOGGER.log(Level.WARNING, "There has been an issue parsing file: {0}", stream);
         }
     }
 
@@ -74,5 +76,10 @@ public class InternetRuleCommand implements GuildCommand {
         }
 
         ctx.getEvent().deferReply().setContent(RULES.get(number - 1)).mentionRepliedUser(false).queue();
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 }

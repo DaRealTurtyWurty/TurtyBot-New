@@ -43,6 +43,11 @@ public class RolesCommand implements GuildCommand {
                 .mentionRepliedUser(false).queue();
     }
 
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
+
     private String getRoles(final Guild guild) {
         final var strBuilder = new StringBuilder();
         final List<Role> roles = guild.getRoles();

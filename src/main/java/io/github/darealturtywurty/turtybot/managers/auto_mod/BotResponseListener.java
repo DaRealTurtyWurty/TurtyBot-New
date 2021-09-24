@@ -1,11 +1,11 @@
 package io.github.darealturtywurty.turtybot.managers.auto_mod;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import io.github.darealturtywurty.turtybot.util.core.CoreBotUtils;
+import io.github.darealturtywurty.turtybot.util.data.GuildInfo;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -13,25 +13,18 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class BotResponseListener extends ListenerAdapter {
 
-    // Map<GuildID, Map<ChannelID, List<MessageID>>>
-    public static final Map<Long, Map<Long, List<Long>>> MESSAGES_BY_GUILD_CHANNEL = new HashMap<>();
-
     public static int cleanResponses(final TextChannel channel, final int amount) {
         final long guildId = channel.getGuild().getIdLong();
         final long channelId = channel.getIdLong();
-        if (!MESSAGES_BY_GUILD_CHANNEL.containsKey(guildId)) {
-            initialize(guildId);
-            return 0;
-        }
+        final GuildInfo info = CoreBotUtils.GUILDS.get(guildId);
 
-        final Map<Long, List<Long>> messagesByChannel = MESSAGES_BY_GUILD_CHANNEL.get(guildId);
+        final Map<Long, List<Long>> messagesByChannel = info.messagesByChannel;
         if (!messagesByChannel.containsKey(channelId))
             return 0;
 
         final List<Long> messages = messagesByChannel.get(channelId);
         if (amount >= messages.size()) {
-            channel.deleteMessagesByIds(messages.stream().map(String::valueOf).collect(Collectors.toList()))
-                    .queue();
+            channel.deleteMessagesByIds(messages.stream().map(String::valueOf).toList()).queue();
             final int count = messages.size();
             messages.clear();
             return count;
@@ -51,22 +44,14 @@ public class BotResponseListener extends ListenerAdapter {
         return counter;
     }
 
-    public static void initialize(final long guildId) {
-        MESSAGES_BY_GUILD_CHANNEL.put(guildId, new HashMap<>());
-    }
-
     @Override
     public void onGuildMessageDelete(final GuildMessageDeleteEvent event) {
         super.onGuildMessageDelete(event);
         final long guildId = event.getGuild().getIdLong();
-        if (!MESSAGES_BY_GUILD_CHANNEL.containsKey(guildId)) {
-            initialize(guildId);
-            return;
-        }
-
         final long channelId = event.getChannel().getIdLong();
+        final GuildInfo info = CoreBotUtils.GUILDS.get(guildId);
 
-        final Map<Long, List<Long>> messagesByChannel = MESSAGES_BY_GUILD_CHANNEL.get(guildId);
+        final Map<Long, List<Long>> messagesByChannel = info.messagesByChannel;
         if (!messagesByChannel.containsKey(channelId))
             return;
 
@@ -84,14 +69,11 @@ public class BotResponseListener extends ListenerAdapter {
         final long guildId = event.getGuild().getIdLong();
 
         if (event.getAuthor().getIdLong() == event.getGuild().getSelfMember().getIdLong()) {
-            if (!MESSAGES_BY_GUILD_CHANNEL.containsKey(guildId)) {
-                initialize(guildId);
-            }
-
             final long channelId = event.getChannel().getIdLong();
             final long messageId = event.getMessageIdLong();
+            final GuildInfo info = CoreBotUtils.GUILDS.get(guildId);
 
-            final Map<Long, List<Long>> messagesByChannel = MESSAGES_BY_GUILD_CHANNEL.get(guildId);
+            final Map<Long, List<Long>> messagesByChannel = info.messagesByChannel;
             if (!messagesByChannel.containsKey(channelId)) {
                 final var messages = new ArrayList<Long>();
                 messages.add(messageId);

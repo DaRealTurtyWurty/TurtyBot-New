@@ -38,4 +38,9 @@ public class PingCommand implements GuildCommand {
                         .format("Rest Ping: %sms%nWebsocket Ping: %sms", ping, ctx.getJDA().getGatewayPing()))
                         .mentionRepliedUser(false).queue());
     }
+
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
 }

@@ -7,13 +7,13 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandManager;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-@RegisterBotCmd
+@RegisterBotCmd(needsManager = true)
 public class HelpCommand implements GuildCommand {
 
     private final CommandManager commandManager;
@@ -71,5 +71,10 @@ public class HelpCommand implements GuildCommand {
                 false);
         embed.setColor(BotUtils.generateRandomPastelColor());
         ctx.getEvent().deferReply(true).addEmbeds(embed.build()).mentionRepliedUser(false).queue();
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 }

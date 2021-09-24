@@ -6,7 +6,7 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.WarnUtils;
+import io.github.darealturtywurty.turtybot.util.core.WarnUtils;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
@@ -41,11 +41,20 @@ public class RemoveWarnCommand implements GuildCommand {
         if (!complete) {
             ctx.getEvent().deferReply(true).setContent("You must provide a valid UUID.")
                     .mentionRepliedUser(false).queue();
+            return;
         }
+
+        ctx.getEvent().deferReply(true)
+                .setContent("Warn with UUID: " + uuid + " has successfully been removed!").queue();
     }
 
     @Override
     public boolean isModeratorOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean productionReady() {
         return true;
     }
 }

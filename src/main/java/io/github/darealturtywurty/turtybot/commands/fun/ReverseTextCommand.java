@@ -38,4 +38,9 @@ public class ReverseTextCommand implements GuildCommand {
         ctx.getEvent().deferReply().setContent(new StringBuilder(text).reverse().toString())
                 .mentionRepliedUser(false).queue();
     }
+
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
 }

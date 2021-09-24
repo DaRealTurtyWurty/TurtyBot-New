@@ -9,7 +9,7 @@ import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
 import io.github.darealturtywurty.turtybot.util.Constants;
-import io.github.darealturtywurty.turtybot.util.WarnUtils;
+import io.github.darealturtywurty.turtybot.util.core.WarnUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -58,9 +58,10 @@ public class WarningsCommand implements GuildCommand {
         final var userWarns = WarnUtils.getUserWarns(guild, toGetUser);
         final var warnsEmbed = new EmbedBuilder()
                 .setColor(toGetMember != null ? toGetMember.getColorRaw() : 0xFFFFFF)
-                .setTitle("Warnings for: " + toGetMember != null ? toGetMember.getEffectiveName()
-                        : toGetUser.getName())
-                .setDescription(toGetMember != null ? toGetMember.getEffectiveName()
+                .setTitle("Warnings for: "
+                        + (toGetMember != null ? toGetMember.getEffectiveName() : toGetUser.getName()))
+                .setDescription(toGetMember != null
+                        ? toGetMember.getEffectiveName() + " has " + userWarns.getNumberWarns() + " warnings!"
                         : toGetUser.getName() + " has " + userWarns.getNumberWarns() + " warnings!")
                 .setTimestamp(Instant.now());
         final var counter = new AtomicInteger(1);
@@ -70,5 +71,10 @@ public class WarningsCommand implements GuildCommand {
                 false));
 
         ctx.getEvent().deferReply().addEmbeds(warnsEmbed.build()).mentionRepliedUser(false).queue();
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 }

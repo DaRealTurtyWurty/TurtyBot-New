@@ -34,12 +34,17 @@ public class ResumeCommand implements GuildCommand {
 
     @Override
     public void handle(final CoreCommandContext ctx) {
-        MusicManager.MUSIC_MANAGERS.get(ctx.getGuild().getIdLong()).player.setPaused(false);
+        MusicManager.getPlayer(ctx.getGuild()).setPaused(false);
         ctx.getEvent().deferReply().setContent("I have resumed the music player!").queue();
     }
 
     @Override
     public boolean isModeratorOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean productionReady() {
         return true;
     }
 }

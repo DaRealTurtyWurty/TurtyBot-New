@@ -6,8 +6,8 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
-import io.github.darealturtywurty.turtybot.util.WarnUtils;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.WarnUtils;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -48,10 +48,17 @@ public class ClearWarnsCommand implements GuildCommand {
         }
 
         WarnUtils.clearWarns(ctx.getGuild(), ctx.getMember(), member);
+        ctx.getEvent().deferReply(true)
+                .setContent(member.getAsMention() + "'s warnings have now been cleared!").queue();
     }
 
     @Override
     public boolean isModeratorOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean productionReady() {
         return true;
     }
 }

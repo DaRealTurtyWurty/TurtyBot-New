@@ -38,11 +38,16 @@ public class ShuffleCommand implements GuildCommand {
 
     @Override
     public void handle(final CoreCommandContext ctx) {
-        final var trackScheduler = MusicManager.MUSIC_MANAGERS.get(ctx.getGuild().getIdLong()).scheduler;
+        final var trackScheduler = MusicManager.getMusicManager(ctx.getGuild()).scheduler;
         final var queue = new ArrayList<AudioTrack>(trackScheduler.getQueue());
         Collections.shuffle(queue);
         trackScheduler.getQueue().clear();
         queue.forEach(track -> trackScheduler.queue(ctx.getChannel(), track, false));
         ctx.getEvent().deferReply().setContent("I have shuffled the queue!").queue();
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 }

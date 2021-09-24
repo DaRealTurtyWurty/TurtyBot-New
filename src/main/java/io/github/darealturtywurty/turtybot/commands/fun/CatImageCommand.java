@@ -7,8 +7,8 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
 import io.github.darealturtywurty.turtybot.util.Constants;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
@@ -44,5 +44,10 @@ public class CatImageCommand implements GuildCommand {
         final String randQuery = "?" + Constants.RANDOM.nextInt() + "=" + Constants.RANDOM.nextInt();
         embed.setImage("https://cataas.com/cat" + randQuery);
         ctx.getEvent().deferReply().addEmbeds(embed.build()).mentionRepliedUser(false).queue();
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 }

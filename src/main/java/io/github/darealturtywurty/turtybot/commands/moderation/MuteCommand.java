@@ -1,11 +1,11 @@
 package io.github.darealturtywurty.turtybot.commands.moderation;
 
 import java.awt.Color;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -13,7 +13,8 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.CoreBotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -27,24 +28,19 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 public class MuteCommand implements GuildCommand {
 
     private static final Timer MUTE_TIMER = new Timer();
-    protected static final Map<Member, List<Role>> MUTED_ROLE_MAP = new HashMap<>();
 
     public static void muteMember(final Guild guild, final Member muter, final Member member,
             @Nullable final Message toDelete, final String reason, final long timeMillis) {
         final var loggingChannel = BotUtils.getModLogChannel(guild);
         final var mutedRole = BotUtils.getMutedRole(guild);
-        final var memberRoles = member.getRoles();
-
         if (toDelete != null) {
             toDelete.delete().queue();
         }
 
-        for (final var role : memberRoles) {
-            if (role.getName().equalsIgnoreCase("@everyone")) {
-                memberRoles.remove(role);
-            }
-        }
-        MUTED_ROLE_MAP.put(member, memberRoles);
+        final Set<Long> memberRoles = member.getRoles().stream()
+                .filter(role -> !role.getName().equalsIgnoreCase("@everyone")).map(Role::getIdLong)
+                .collect(Collectors.toSet());
+        CoreBotUtils.GUILDS.get(guild.getIdLong()).mutedUserRoles.put(member.getIdLong(), memberRoles);
 
         guild.modifyMemberRoles(member, mutedRole).queue();
 
@@ -123,24 +119,29 @@ public class MuteCommand implements GuildCommand {
         return true;
     }
 
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
+
     private long parseTimeUnit(final String time) {
         var multiplier = 1000L;
         for (final char c : time.toCharArray()) {
             switch (c) {
-            case 's', 'S':
-                multiplier = 1000L;
-                break;
-            case 'm', 'M':
-                multiplier = 60000L;
-                break;
-            case 'h', 'H':
-                multiplier = 3600000L;
-                break;
-            case 'd', 'D':
-                multiplier = 86400000L;
-                break;
-            default:
-                continue;
+                case 's', 'S':
+                    multiplier = 1000L;
+                    break;
+                case 'm', 'M':
+                    multiplier = 60000L;
+                    break;
+                case 'h', 'H':
+                    multiplier = 3600000L;
+                    break;
+                case 'd', 'D':
+                    multiplier = 86400000L;
+                    break;
+                default:
+                    continue;
             }
         }
         return multiplier;

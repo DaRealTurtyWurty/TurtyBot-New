@@ -42,6 +42,12 @@ public class CleanBotCommand implements GuildCommand {
             amount = Math.max(1, Math.min(100, (int) amountOption.getAsLong()));
         }
 
-        BotResponseListener.cleanResponses(ctx.getChannel(), amount);
+        final int completed = BotResponseListener.cleanResponses(ctx.getChannel(), amount);
+        ctx.getEvent().deferReply(true).setContent("I have cleaned " + completed + " messages!").queue();
+    }
+
+    @Override
+    public boolean isModeratorOnly() {
+        return true;
     }
 }

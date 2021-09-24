@@ -53,4 +53,9 @@ public class VolumeCommand implements GuildCommand {
     public boolean isBoosterOnly() {
         return true;
     }
+
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
 }

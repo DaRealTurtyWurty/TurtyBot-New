@@ -98,7 +98,7 @@ public class QueueCommand implements GuildCommand {
         }
 
         final var count = new AtomicInteger(0);
-        MusicManager.MUSIC_MANAGERS.get(ctx.getGuild().getIdLong()).scheduler.getQueue().forEach(track -> {
+        MusicManager.getMusicManager(ctx.getGuild()).scheduler.getQueue().forEach(track -> {
             if (count.addAndGet(1) <= 25) {
                 final AudioTrackInfo trackInfo = track.getInfo();
                 embed.addField(trackInfo.title, getDurationBreakdown(trackInfo.length), false);
@@ -108,7 +108,7 @@ public class QueueCommand implements GuildCommand {
     }
 
     @Override
-    public boolean isModeratorOnly() {
+    public boolean productionReady() {
         return true;
     }
 }

@@ -38,4 +38,9 @@ public class MemeCommand extends BaseRedditCommand {
         return Sets.newHashSet("memes", "dankmemes", "blackpeopletwitter", "memeeconomy", "me_irl",
                 "adviceanimals");
     }
+
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
 }

@@ -36,7 +36,7 @@ public class LeaveCommand implements GuildCommand {
     public void handle(final CoreCommandContext ctx) {
         if (ctx.getGuild().getAudioManager().isConnected()) {
             ctx.getGuild().getAudioManager().closeAudioConnection();
-            MusicManager.MUSIC_MANAGERS.get(ctx.getGuild().getIdLong()).scheduler.getQueue().clear();
+            MusicManager.getMusicManager(ctx.getGuild()).scheduler.getQueue().clear();
             ctx.getEvent().deferReply().setContent("I have left the voice channel. 😢").queue();
             return;
         }
@@ -47,6 +47,11 @@ public class LeaveCommand implements GuildCommand {
 
     @Override
     public boolean isModeratorOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean productionReady() {
         return true;
     }
 }

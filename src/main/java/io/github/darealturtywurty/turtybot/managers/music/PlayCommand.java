@@ -35,6 +35,17 @@ public class PlayCommand implements GuildCommand {
 
     @Override
     public void handle(final CoreCommandContext ctx) {
+        if (ctx.getGuild().getAudioManager().getConnectedChannel() == null) {
+            if (ctx.getMember().getVoiceState().inVoiceChannel()) {
+                ctx.getGuild().getAudioManager()
+                        .openAudioConnection(ctx.getMember().getVoiceState().getChannel());
+                ctx.getEvent().deferReply().setContent("I have joined the voice channel!").queue();
+            } else {
+                ctx.getEvent().deferReply(true)
+                        .setContent("You must be in a voice channel to use this command!").queue();
+            }
+        }
+
         final boolean success = MusicManager.loadAndPlay(ctx.getChannel(),
                 ctx.getEvent().getOption("music").getAsString(), false);
         if (success) {
@@ -44,5 +55,10 @@ public class PlayCommand implements GuildCommand {
             ctx.getEvent().deferReply(true).setContent("There was an error adding \""
                     + ctx.getEvent().getOption("music").getAsString() + "\" to the queue!").queue();
         }
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 }

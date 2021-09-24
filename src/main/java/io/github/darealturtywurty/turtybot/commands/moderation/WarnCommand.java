@@ -6,8 +6,8 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
-import io.github.darealturtywurty.turtybot.util.WarnUtils;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.WarnUtils;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -59,11 +59,17 @@ public class WarnCommand implements GuildCommand {
         final var userWarns = WarnUtils.getUserWarns(ctx.getGuild(), toWarn);
         if (userWarns != null) {
             userWarns.addWarn(ctx.getGuild(), ctx.getMember(), reason);
+            ctx.getEvent().deferReply(true).setContent(toWarn.getAsMention() + " has been warned!").queue();
         }
     }
 
     @Override
     public boolean isModeratorOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean productionReady() {
         return true;
     }
 }

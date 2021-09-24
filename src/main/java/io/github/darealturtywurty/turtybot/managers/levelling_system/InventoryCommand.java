@@ -8,8 +8,8 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.managers.levelling_system.InventoryItem.Rarity;
 import io.github.darealturtywurty.turtybot.util.Constants;
+import io.github.darealturtywurty.turtybot.util.data.InventoryItem.Rarity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 

@@ -6,7 +6,7 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -55,6 +55,11 @@ public class BotInfoCommand implements GuildCommand {
     @Override
     public void handle(final CoreCommandContext ctx) {
         sendInfo(ctx.getJDA(), ctx.getGuild(), ctx.getEvent().deferReply());
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 
     public void sendInfo(final JDA jda, final Guild guild, final ReplyAction action) {

@@ -53,4 +53,9 @@ public class PauseCommand implements GuildCommand {
     public boolean isModeratorOnly() {
         return true;
     }
+
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
 }

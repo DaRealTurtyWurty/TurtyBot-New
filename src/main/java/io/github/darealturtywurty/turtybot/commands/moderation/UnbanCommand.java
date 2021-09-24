@@ -9,7 +9,7 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -24,15 +24,17 @@ public class UnbanCommand implements GuildCommand {
 
     public static void unbanUser(final Guild guild, final Member unbanner, final long toUnban,
             @Nullable final Message toDelete, final String reason) {
-        guild.unban(String.valueOf(toUnban)).queue();
-        final var unbanLogEmbed = new EmbedBuilder().setColor(Color.RED)
-                .setTitle("User with ID: \"" + toUnban + "\" was unbanned!")
-                .setDescription("**Reason**: " + reason + "\n**Unbanned By**: " + unbanner.getAsMention());
-        BotUtils.getModLogChannel(guild).sendMessageEmbeds(unbanLogEmbed.build()).queue();
+        guild.unban(String.valueOf(toUnban)).queue(ban -> {
+            final var unbanLogEmbed = new EmbedBuilder().setColor(Color.RED)
+                    .setTitle("User with ID: \"" + toUnban + "\" was unbanned!").setDescription(
+                            "**Reason**: " + reason + "\n**Unbanned By**: " + unbanner.getAsMention());
+            BotUtils.getModLogChannel(guild).sendMessageEmbeds(unbanLogEmbed.build()).queue();
 
-        if (toDelete != null) {
-            toDelete.delete().queue();
-        }
+            if (toDelete != null) {
+                toDelete.delete().queue();
+            }
+        }, error -> {
+        });
     }
 
     @Override
@@ -75,10 +77,18 @@ public class UnbanCommand implements GuildCommand {
         final OptionMapping reasonOption = ctx.getEvent().getOption("reason");
         final String reason = reasonOption == null ? "Unspecified" : reasonOption.getAsString();
         unbanUser(guild, ctx.getMember(), toUnban.getIdLong(), null, reason);
+        ctx.getEvent().deferReply(true).setContent(
+                "User: `" + toUnban.getName() + "#" + toUnban.getDiscriminator() + "` has been unbanned!")
+                .queue();
     }
 
     @Override
     public boolean isModeratorOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean productionReady() {
         return true;
     }
 }

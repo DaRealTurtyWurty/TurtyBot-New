@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import com.vdurmont.emoji.EmojiParser;
 
 import io.github.darealturtywurty.turtybot.util.Constants;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
+import io.github.darealturtywurty.turtybot.util.data.Poll;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -49,6 +51,9 @@ public class PollCommand extends ListenerAdapter {
     @Override
     public void onGuildMessageReactionAdd(final GuildMessageReactionAddEvent event) {
         super.onGuildMessageReactionAdd(event);
+        // TODO: Fix
+        if (BotUtils.notTestServer(event.getGuild()))
+            return;
         if (event.getUser().isBot())
             return;
 

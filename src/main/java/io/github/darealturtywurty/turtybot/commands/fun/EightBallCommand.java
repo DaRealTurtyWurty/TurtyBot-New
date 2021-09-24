@@ -66,17 +66,17 @@ public class EightBallCommand implements GuildCommand {
             final var embed = new EmbedBuilder();
             var color = Color.BLACK;
             switch (magicObj.get("type").getAsString().toLowerCase()) {
-            case "affirmative":
-                color = Color.GREEN;
-                break;
-            case "neutral":
-                color = Color.BLUE;
-                break;
-            case "contrary":
-                color = Color.RED;
-                break;
-            default:
-                break;
+                case "affirmative":
+                    color = Color.GREEN;
+                    break;
+                case "neutral":
+                    color = Color.BLUE;
+                    break;
+                case "contrary":
+                    color = Color.RED;
+                    break;
+                default:
+                    break;
             }
 
             embed.setColor(color);
@@ -88,6 +88,11 @@ public class EightBallCommand implements GuildCommand {
             ctx.getEvent().deferReply().setContent("There was an issue accessing the database.")
                     .mentionRepliedUser(false).queue();
         }
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 
 }

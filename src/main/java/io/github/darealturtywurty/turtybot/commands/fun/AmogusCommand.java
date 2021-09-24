@@ -17,13 +17,18 @@ public class AmogusCommand implements GuildCommand {
     }
 
     @Override
+    public long getCooldownMillis() {
+        return 600000;
+    }
+
+    @Override
     public String getDescription() {
         return "Sus.";
     }
 
     @Override
     public String getName() {
-        return "amogus";
+        return "amongus";
     }
 
     @Override
@@ -37,7 +42,7 @@ public class AmogusCommand implements GuildCommand {
                 "Red 🔴 📛 sus 💦 💦. Red 🔴 🔴 suuuus. I 👁👄 👁 said 🤠🗣 💬👱🏿💦 red 👹 🔴, sus 💦 💦, hahahahaha 🤣 🤣. "
                         + "Why 🤔 🤔 arent you 👉😯 👈 laughing 😂 😂? I 👁🍊 👥 just made 👑 👑 a reference 👀👄🙀 👀👄🙀 "
                         + "to the popular 👍😁😂 😂 video 📹 📹 game 🎮 🎮 \"Among 🇷🇴🎛 💰 Us 👨 👨\"! How can you 👈 👈 not laugh 😂 😂 at it? "
-                        + "Emergeny meeting 💯 🤝! Guys 👦 👨, this here guy 👨 👱🏻👨🏻 doesnt laugh 🤣 ☑😂😅 at my funny 😃😂 🍺😛😃 "
+                        + "Emergency meeting 💯 🤝! Guys 👦 👨, this here guy 👨 👱🏻👨🏻 doesn't laugh 🤣 ☑😂😅 at my funny 😃😂 🍺😛😃 "
                         + "Among 💰 💰 Us 👨 👨 memes 🐸 😂! Lets 🙆 🙆 beat ✊👊🏻 😰👊 him 👴 👨 to death 💀💥❓ 💀! "
                         + "Dead 💀😂 ☠ body 💃 💃 reported ☎ 🧐! Skip 🐧 🏃🏼! Skip 🐧 🐧! Vote 🔝 🔝 blue 💙 💙! "
                         + "Blue 💙 💙 was not an impostor 😎 😠. Among 😂 🙆🏽🅰 us 👨 👨 in a nutshell 😠 😠 hahahaha 😂👌👋 😂. "
@@ -49,5 +54,10 @@ public class AmogusCommand implements GuildCommand {
                         + "im 👌 💘 annoying 😠 😠? Kinda 🙅 🙅 sus 💦 💦, bro 👆 🌈☺👬. Hahahaha 😂 😂! Anyway 🔛 🔛, yea 😀 💯, "
                         + "gotta 👉 👉 go 🏃 🏃 do tasks ✔ 📋. Hahahaha 😂 😂!")
                 .queue();
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 }

@@ -44,4 +44,9 @@ public class JoinCommand implements GuildCommand {
         ctx.getEvent().deferReply(true).setContent("You must be in a voice channel to use this command!")
                 .mentionRepliedUser(false).queue();
     }
+
+    @Override
+    public boolean productionReady() {
+        return true;
+    }
 }
