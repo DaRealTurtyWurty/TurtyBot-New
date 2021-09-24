@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 public interface GuildCommand {
 
@@ -13,11 +14,19 @@ public interface GuildCommand {
 
     CommandCategory getCategory();
 
+    default long getCooldownMillis() {
+        return 0L;
+    }
+
     String getDescription();
 
     String getName();
 
     List<OptionData> getOptions();
+
+    default List<SubcommandData> getSubcommandData() {
+        return List.of();
+    }
 
     void handle(CoreCommandContext ctx);
 
@@ -38,6 +47,10 @@ public interface GuildCommand {
     }
 
     default boolean isNSFW() {
+        return false;
+    }
+
+    default boolean productionReady() {
         return false;
     }
 

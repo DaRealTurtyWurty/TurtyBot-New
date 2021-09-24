@@ -4,14 +4,14 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 public class CoreCommandContext implements CommandContext {
 
-	private final SlashCommandEvent event;
+    private final SlashCommandEvent event;
 
-	public CoreCommandContext(final SlashCommandEvent event) {
-		this.event = event;
-	}
+    public CoreCommandContext(final SlashCommandEvent event) {
+        this.event = event;
+    }
 
-	@Override
-	public SlashCommandEvent getEvent() {
-		return this.event;
-	}
+    @Override
+    public SlashCommandEvent getEvent() {
+        return this.event;
+    }
 }

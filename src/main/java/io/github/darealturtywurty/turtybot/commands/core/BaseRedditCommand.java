@@ -8,8 +8,8 @@ import javax.annotation.Nullable;
 
 import com.squareup.moshi.JsonDataException;
 
-import io.github.darealturtywurty.turtybot.util.BotUtils;
 import io.github.darealturtywurty.turtybot.util.SubredditMissingException;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dean.jraw.ApiException;
 import net.dean.jraw.RedditClient;
 import net.dean.jraw.http.NetworkException;
