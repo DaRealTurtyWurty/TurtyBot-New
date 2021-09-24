@@ -23,8 +23,8 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
 import io.github.darealturtywurty.turtybot.util.Constants;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -42,7 +42,11 @@ public class GithubRepoCommand implements GuildCommand {
             description = from.get("description").getAsString();
         }
 
-        final String language = from.get("language").getAsString();
+        String language = "No language";
+        if (!(from.get("language") instanceof JsonNull)) {
+            language = from.get("language").getAsString();
+        }
+
         final String defaultBranch = from.get("default_branch").getAsString();
         final String createdAt = from.get("created_at").getAsString();
         final String updatedAt = from.get("updated_at").getAsString();
@@ -169,6 +173,11 @@ public class GithubRepoCommand implements GuildCommand {
             ctx.getEvent().deferReply().setContent("A repository with this name could not be found!")
                     .mentionRepliedUser(false).queue();
         }
+    }
+
+    @Override
+    public boolean productionReady() {
+        return true;
     }
 
     private static record Repository(String name, String authorName, String url, String description,

@@ -19,8 +19,12 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
-import io.github.darealturtywurty.turtybot.util.BotUtils;
 import io.github.darealturtywurty.turtybot.util.Constants;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.CoreBotUtils;
+import io.github.darealturtywurty.turtybot.util.data.GuildInfo;
+import io.github.darealturtywurty.turtybot.util.data.InventoryItem;
+import io.github.darealturtywurty.turtybot.util.data.RankCard;
 import io.vavr.collection.Stream;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -31,14 +35,6 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class LevellingManager extends ListenerAdapter {
-
-    protected static final Map<Guild, Map<Member, RankCard>> RANK_CARD_DATA = new HashMap<>();
-
-    private final Map<Guild, MongoCollection<Document>> levels = new HashMap<>();
-
-    private final Map<Guild, LinkedList<Document>> leaderboard = new HashMap<>();
-
-    private final Map<Guild, Map<Member, Integer>> memberCooldown = new HashMap<>();
 
     private final MongoDatabase database;
 
@@ -57,16 +53,20 @@ public class LevellingManager extends ListenerAdapter {
         return (int) (5 * Math.pow(level, 2) + 50 * level + 5);
     }
 
+    private static GuildInfo getGuildInfo(final long guildID) {
+        return CoreBotUtils.GUILDS.get(guildID);
+    }
+
     private static float lerp(final float min, final float max, final float numb) {
         return min * (1.0f - numb) + max * numb;
     }
 
     public Document findCard(final Member member) {
-        var collection = this.levels.get(member.getGuild());
+        var collection = getGuildInfo(member.getGuild().getIdLong()).levels;
         if (collection == null) {
             this.database.createCollection(member.getGuild().getName());
             collection = this.database.getCollection(member.getGuild().getName());
-            this.levels.put(member.getGuild(), collection);
+            getGuildInfo(member.getGuild().getIdLong()).levels = collection;
         }
 
         final FindIterable<Document> documents = collection.find(Filters.eq("ID", member.getIdLong()));
@@ -107,37 +107,28 @@ public class LevellingManager extends ListenerAdapter {
 
     public List<Document> getLeaderboard(final Guild guild) {
         sortLeaderboard(guild);
-        return this.leaderboard.get(guild);
+        return getGuildInfo(guild.getIdLong()).leaderboard;
     }
 
     public int getRank(final Member member) {
         sortLeaderboard(member.getGuild());
-        return Stream.of(this.leaderboard.get(member.getGuild()).toArray(new Document[0]))
+        return Stream.of(getGuildInfo(member.getGuild().getIdLong()).leaderboard.toArray(new Document[0]))
                 .indexWhere(doc -> doc.getLong("ID") == member.getIdLong());
     }
 
-    public int getStoredMemberCount() {
-        return this.leaderboard.size();
+    public int getStoredMemberCount(final long guildID) {
+        return getGuildInfo(guildID).leaderboard.size();
     }
 
-    public int getUserCooldown(final Member member) {
-        Map<Member, Integer> cooldowns = null;
-        if (!this.memberCooldown.containsKey(member.getGuild())) {
-            cooldowns = new HashMap<>();
-            this.memberCooldown.put(member.getGuild(), cooldowns);
-        }
-
-        if (cooldowns == null) {
-            cooldowns = this.memberCooldown.get(member.getGuild());
-        }
-
-        if (cooldowns.containsKey(member))
-            return cooldowns.get(member);
+    public int getUserCooldown(final long guildID, final long userID) {
+        final GuildInfo info = CoreBotUtils.GUILDS.get(guildID);
+        if (info.xpCooldown.containsKey(userID))
+            return info.xpCooldown.get(userID);
         return 0;
     }
 
     public int getUserXP(final Member member) {
-        MongoCollection<Document> collection = this.levels.get(member.getGuild());
+        MongoCollection<Document> collection = getGuildInfo(member.getGuild().getIdLong()).levels;
         if (collection == null) {
             try {
                 collection = this.database.getCollection(member.getGuild().getName());
@@ -146,13 +137,10 @@ public class LevellingManager extends ListenerAdapter {
                 collection = this.database.getCollection(member.getGuild().getName());
             }
 
-            this.levels.put(member.getGuild(), collection);
-            if (!this.leaderboard.containsKey(member.getGuild())) {
-                this.leaderboard.put(member.getGuild(), new LinkedList<>());
-            }
+            getGuildInfo(member.getGuild().getIdLong()).levels = collection;
         }
 
-        final LinkedList<Document> lb = this.leaderboard.get(member.getGuild());
+        final List<Document> lb = getGuildInfo(member.getGuild().getIdLong()).leaderboard;
 
         Document user = collection.find(new Document("ID", member.getIdLong())).first();
         if (user == null) {
@@ -169,6 +157,9 @@ public class LevellingManager extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
         super.onGuildMessageReceived(event);
+        // TODO: Fix
+        if (BotUtils.notTestServer(event.getGuild()))
+            return;
         if (event.isWebhookMessage() || event.getMember().getUser().isBot())
             return;
 
@@ -187,15 +178,15 @@ public class LevellingManager extends ListenerAdapter {
             final var decimalFormat = new DecimalFormat("#.####");
             final var months = Float.parseFloat(decimalFormat
                     .format((member.getTimeBoosted().toInstant().toEpochMilli() - System.currentTimeMillis())
-                            / Constants.MILLI_TO_MONTH));
+                            / Constants.MONTH_TO_MILLI));
             boostMultiplier += months / 12f;
         }
 
-        if (getUserCooldown(member) <= 0) {
+        if (getUserCooldown(member.getGuild().getIdLong(), member.getIdLong()) <= 0) {
             final int level = getLevelForXP(getUserXP(member));
             setUserXP(member, getUserXP(member)
                     + Math.round((Constants.RANDOM.nextInt(25) + 5) * boostMultiplier * messageMultiplier));
-            setUserCooldown(member, 15);
+            setUserCooldown(member.getGuild().getIdLong(), member.getIdLong(), 15);
             final int newLevel = getLevelForXP(getUserXP(member));
             if (newLevel > level) {
                 message.getChannel().sendMessage("Congrats " + member.getAsMention()
@@ -209,29 +200,22 @@ public class LevellingManager extends ListenerAdapter {
 
     }
 
-    public void setUserCooldown(final Member member, final int cooldown) {
-        if (!this.memberCooldown.containsKey(member.getGuild())) {
-            this.memberCooldown.put(member.getGuild(), new HashMap<>());
-        }
-
-        this.memberCooldown.get(member.getGuild()).put(member, cooldown);
+    public void setUserCooldown(final long guildID, final long userID, final int cooldown) {
+        final GuildInfo info = CoreBotUtils.GUILDS.get(guildID);
+        info.xpCooldown.put(userID, cooldown);
     }
 
     public void setUserXP(final Member member, final int xp) {
         final var userDoc = new Document("ID", member.getIdLong());
 
-        MongoCollection<Document> collection = this.levels.get(member.getGuild());
+        MongoCollection<Document> collection = getGuildInfo(member.getGuild().getIdLong()).levels;
         if (collection == null) {
             this.database.createCollection(member.getGuild().getName());
             collection = this.database.getCollection(member.getGuild().getName());
-            this.levels.put(member.getGuild(), collection);
+            getGuildInfo(member.getGuild().getIdLong()).levels = collection;
         }
 
-        LinkedList<Document> lb = this.leaderboard.get(member.getGuild());
-        if (lb == null) {
-            lb = new LinkedList<>();
-            this.leaderboard.put(member.getGuild(), lb);
-        }
+        final List<Document> lb = getGuildInfo(member.getGuild().getIdLong()).leaderboard;
 
         Document user = collection.find(userDoc).first();
         final var update = new Document("$set", new Document("XP", xp));
@@ -242,7 +226,7 @@ public class LevellingManager extends ListenerAdapter {
 
         lb.remove(user);
         collection.updateOne(userDoc, update);
-        lb.add(this.levels.get(member.getGuild()).find(userDoc).first());
+        lb.add(getGuildInfo(member.getGuild().getIdLong()).levels.find(userDoc).first());
 
         getOrCreateCard(member);
     }
@@ -251,13 +235,14 @@ public class LevellingManager extends ListenerAdapter {
         for (final var collection : this.database.listCollectionNames()) {
             final var guildCollection = this.database.getCollection(collection);
             final var guild = bot.getGuildsByName(collection, false).get(0);
-            this.levels.put(guild, guildCollection);
-            this.leaderboard.put(guild, new LinkedList<>());
-            for (final Document document : this.levels.get(guild).find().sort(new Document("XP", -1))) {
-                this.leaderboard.get(guild).add(document);
+            getGuildInfo(guild.getIdLong()).levels = guildCollection;
+            for (final Document document : getGuildInfo(guild.getIdLong()).levels.find()
+                    .sort(new Document("XP", -1))) {
+                getGuildInfo(guild.getIdLong()).leaderboard.add(document);
             }
 
-            for (final Document document : this.levels.get(guild).find(Filters.exists("MemberID"))) {
+            for (final Document document : getGuildInfo(guild.getIdLong()).levels
+                    .find(Filters.exists("MemberID"))) {
                 final var member = guild.getMemberById(document.getString("MemberID"));
                 final var card = new RankCard(member);
 
@@ -294,8 +279,8 @@ public class LevellingManager extends ListenerAdapter {
         final var timerTask = new TimerTask() {
             @Override
             public void run() {
-                LevellingManager.this.memberCooldown.forEach((guild, map) -> map.keySet()
-                        .forEach(member -> setUserCooldown(member, getUserCooldown(member) - 1)));
+                CoreBotUtils.GUILDS.forEach((guildID, info) -> info.xpCooldown.forEach((userID,
+                        cooldown) -> setUserCooldown(guildID, userID, getUserCooldown(guildID, userID) - 1)));
             }
         };
 
@@ -305,23 +290,18 @@ public class LevellingManager extends ListenerAdapter {
     public RankCard updateCard(final Member member, RankCard card) {
         final var userDoc = new Document("ID", member.getIdLong());
 
-        MongoCollection<Document> collection = this.levels.get(member.getGuild());
+        MongoCollection<Document> collection = getGuildInfo(member.getGuild().getIdLong()).levels;
         if (collection == null) {
             this.database.createCollection(member.getGuild().getName());
             collection = this.database.getCollection(member.getGuild().getName());
-            this.levels.put(member.getGuild(), collection);
-        }
-
-        LinkedList<Document> lb = this.leaderboard.get(member.getGuild());
-        if (lb == null) {
-            lb = new LinkedList<>();
-            this.leaderboard.put(member.getGuild(), lb);
+            getGuildInfo(member.getGuild().getIdLong()).levels = collection;
         }
 
         Document user = collection.find(userDoc).first();
         if (card == null) {
             card = new RankCard(member);
         }
+
         final Map<String, Object> items = new HashMap<>();
         items.put("MemberID", card.member.getId());
         items.put("BackgroundColour", card.backgroundColour.getRGB());
@@ -350,22 +330,17 @@ public class LevellingManager extends ListenerAdapter {
         }
 
         collection.updateOne(userDoc, update);
-        if (!RANK_CARD_DATA.get(member.getGuild()).containsKey(member)) {
-            RANK_CARD_DATA.get(member.getGuild()).put(member, card);
-        } else {
-            final var map = new HashMap<Member, RankCard>();
-            map.put(member, card);
-            RANK_CARD_DATA.put(member.getGuild(), map);
-        }
+        getGuildInfo(member.getGuild().getIdLong()).userRankCards.put(member.getIdLong(), card);
         return card;
     }
 
     protected RankCard getOrCreateCard(final Member member) {
+        final Map<Long, RankCard> cardMap = getGuildInfo(member.getGuild().getIdLong()).userRankCards;
         RankCard rankCard = null;
-        if (!RANK_CARD_DATA.containsKey(member.getGuild())) {
+        if (!cardMap.containsKey(member.getIdLong())) {
             rankCard = getCardFromDB(member);
         } else {
-            rankCard = RANK_CARD_DATA.get(member.getGuild()).get(member);
+            rankCard = cardMap.get(member.getIdLong());
             if (rankCard == null) {
                 rankCard = getCardFromDB(member);
             }
@@ -376,29 +351,23 @@ public class LevellingManager extends ListenerAdapter {
     protected void updateInventory(final Member member) {
         final var userDoc = new Document("ID", member.getIdLong());
 
-        MongoCollection<Document> collection = this.levels.get(member.getGuild());
+        MongoCollection<Document> collection = getGuildInfo(member.getGuild().getIdLong()).levels;
         if (collection == null) {
             this.database.createCollection(member.getGuild().getName());
             collection = this.database.getCollection(member.getGuild().getName());
-            this.levels.put(member.getGuild(), collection);
-        }
-
-        LinkedList<Document> lb = this.leaderboard.get(member.getGuild());
-        if (lb == null) {
-            lb = new LinkedList<>();
-            this.leaderboard.put(member.getGuild(), lb);
+            getGuildInfo(member.getGuild().getIdLong()).levels = collection;
         }
 
         Document user = collection.find(userDoc).first();
 
         RankCard card = null;
-        final Map<Member, RankCard> guildData = RANK_CARD_DATA.get(member.getGuild());
-        if (guildData == null || !guildData.containsKey(member)) {
+        final Map<Long, RankCard> rankCards = getGuildInfo(member.getGuild().getIdLong()).userRankCards;
+        if (rankCards == null || !rankCards.containsKey(member.getIdLong())) {
             card = new RankCard(member);
         }
 
         if (card == null) {
-            card = guildData.get(member);
+            card = rankCards.get(member.getIdLong());
         }
 
         final var invJson = new JsonArray();
@@ -415,13 +384,8 @@ public class LevellingManager extends ListenerAdapter {
 
     @SuppressWarnings({ "deprecation", "unchecked" })
     private void sortLeaderboard(final Guild guild) {
-        LinkedList<Document> lb = this.leaderboard.get(guild);
-        if (lb == null) {
-            lb = new LinkedList<>();
-            this.leaderboard.put(guild, lb);
-        }
-
-        final LinkedList<Document> oldBoard = (LinkedList<Document>) lb.clone();
+        final List<Document> lb = getGuildInfo(guild.getIdLong()).leaderboard;
+        final List<Document> oldBoard = (LinkedList<Document>) ((LinkedList<Document>) lb).clone();
         lb.removeAll(oldBoard);
         Stream.of(oldBoard.toArray(new Document[0]))
                 .sorted((doc1, doc2) -> Integer.compare(doc2.getInteger("XP"), doc1.getInteger("XP")))

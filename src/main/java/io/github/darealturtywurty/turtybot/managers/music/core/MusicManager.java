@@ -1,8 +1,6 @@
 package io.github.darealturtywurty.turtybot.managers.music.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,6 +14,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import io.github.darealturtywurty.turtybot.util.core.CoreBotUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -25,13 +24,15 @@ public final class MusicManager {
 
     private static final AudioPlayerManager PLAYER_MANAGER = new DefaultAudioPlayerManager();
 
-    public static final Map<Long, GuildMusicManager> MUSIC_MANAGERS = new HashMap<>();
-
     private MusicManager() {
     }
 
+    public static GuildMusicManager getMusicManager(final Guild guild) {
+        return CoreBotUtils.GUILDS.get(guild.getIdLong()).musicManager;
+    }
+
     public static AudioPlayer getPlayer(final Guild guild) {
-        return MUSIC_MANAGERS.get(guild.getIdLong()).player;
+        return getMusicManager(guild).player;
     }
 
     public static boolean loadAndPlay(final TextChannel channel, final String trackUrl, final boolean first) {
@@ -118,12 +119,11 @@ public final class MusicManager {
     }
 
     private static synchronized GuildMusicManager getGuildAudioPlayer(final Guild guild) {
-        final var guildId = Long.parseLong(guild.getId());
-        GuildMusicManager musicManager = MUSIC_MANAGERS.get(guildId);
+        GuildMusicManager musicManager = getMusicManager(guild);
 
         if (musicManager == null) {
             musicManager = new GuildMusicManager(PLAYER_MANAGER);
-            MUSIC_MANAGERS.put(guildId, musicManager);
+            CoreBotUtils.GUILDS.get(guild.getIdLong()).musicManager = musicManager;
         }
 
         guild.getAudioManager().setSendingHandler(musicManager.getSendHandler());

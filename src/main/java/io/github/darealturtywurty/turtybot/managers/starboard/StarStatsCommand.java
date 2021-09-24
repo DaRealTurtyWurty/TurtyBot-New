@@ -7,8 +7,8 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
-import io.github.darealturtywurty.turtybot.util.CoreBotUtils;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.CoreBotUtils;
 import io.github.darealturtywurty.turtybot.util.data.GuildInfo;
 import io.github.darealturtywurty.turtybot.util.data.StarStats;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -22,7 +22,8 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 public class StarStatsCommand implements GuildCommand {
 
     private static GuildInfo getOrCreateGuildInfo(final Guild guild) {
-        return CoreBotUtils.GUILDS.get(guild) == null ? new GuildInfo(guild) : CoreBotUtils.GUILDS.get(guild);
+        return CoreBotUtils.GUILDS.get(guild.getIdLong()) == null ? new GuildInfo(guild)
+                : CoreBotUtils.GUILDS.get(guild.getIdLong());
     }
 
     @Override

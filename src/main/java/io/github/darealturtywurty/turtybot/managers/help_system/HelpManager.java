@@ -2,17 +2,21 @@ package io.github.darealturtywurty.turtybot.managers.help_system;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import io.github.darealturtywurty.turtybot.managers.modding_helper.ModdingHelperManager;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
 import io.github.darealturtywurty.turtybot.util.Constants;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.CoreBotUtils;
+import io.github.darealturtywurty.turtybot.util.data.CloseData;
+import io.github.darealturtywurty.turtybot.util.data.HelpData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -23,13 +27,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.internal.utils.tuple.Pair;
 
 public final class HelpManager {
-
-    protected static final Set<Map<Long, Long>> CHANNEL_SET = new HashSet<>();
-
-    protected static final Map<Long, Pair<Pair<HelpData, Integer>, Pair<CloseData, Integer>>> CHANNEL_STAGE_MAP = new HashMap<>();
 
     protected static final int MAX_CHANNEL_COUNT = 50;
     protected static final String SUPPORT = "Support ";
@@ -39,99 +38,103 @@ public final class HelpManager {
     }
 
     public static void handleClosing(final TextChannel channel, final Message message, final long ownerID) {
-        Pair<CloseData, Integer> closeData = CHANNEL_STAGE_MAP.get(channel.getIdLong()).getRight();
-        final Pair<HelpData, Integer> helpData = CHANNEL_STAGE_MAP.get(channel.getIdLong()).getLeft();
+        final Map<Long, Pair<Pair<HelpData, Integer>, Pair<CloseData, Integer>>> channelStages = CoreBotUtils.GUILDS
+                .get(channel.getGuild().getIdLong()).channelStages;
+        Pair<CloseData, Integer> closeData = channelStages.get(channel.getIdLong()).getRight();
+        final Pair<HelpData, Integer> helpData = channelStages.get(channel.getIdLong()).getLeft();
         if (closeData == null) {
             closeData = Pair.of(new CloseData(), 0);
-            CHANNEL_STAGE_MAP.put(channel.getIdLong(), Pair.of(helpData, closeData));
+            channelStages.put(channel.getIdLong(), Pair.of(helpData, closeData));
         }
 
         switch (closeData.getRight()) {
-        case 0:
-            channel.sendMessage("Did you receive the help that you needed from this help channel? (Y/N)")
-                    .queue();
-            CHANNEL_STAGE_MAP.put(channel.getIdLong(), Pair.of(helpData, Pair.of(closeData.getLeft(), 1)));
-            break;
-        case 1:
-            switch (message.getContentDisplay().strip().toLowerCase()) {
-            case "y":
-                channel.sendMessage("I am glad that you managed to receieve the support you needed!\n"
-                        + "Can you provide the IDs or `@user`s of all of the users that helped you; "
-                        + "If no users helped you, please reply with `N/A`.").queue();
-                CHANNEL_STAGE_MAP.put(channel.getIdLong(),
-                        Pair.of(helpData, Pair.of(closeData.getLeft(), 2)));
-                break;
-            case "n":
-                channel.sendMessage(
-                        "I apologise that you did not receive the support you needed! Lots of people need help and unfortunately, "
-                                + "we cannot help everyone due to real world circumstances. There are also some problems that "
-                                + "we may not know how to fix, as not all modders know everything. If you feel that the latter of these "
-                                + "is the case, you can run `!mmd` or `!forgecord` in #bot-stuff to bring you to a server that "
-                                + "has a wider range of users with a wider range of knowledge.")
-                        .queue();
-                closeChannel(channel);
-                channel.delete().queue();
-                break;
-            default:
+            case 0:
                 channel.sendMessage("Did you receive the help that you needed from this help channel? (Y/N)")
                         .queue();
+                channelStages.put(channel.getIdLong(), Pair.of(helpData, Pair.of(closeData.getLeft(), 1)));
                 break;
-            }
-            break;
-        case 2:
-            final String text = message.getContentRaw();
-            if (text.trim().equalsIgnoreCase("n/a")) {
-                CHANNEL_STAGE_MAP.put(channel.getIdLong(),
-                        Pair.of(helpData, Pair.of(closeData.getLeft(), 3)));
+            case 1:
+                switch (message.getContentDisplay().strip().toLowerCase()) {
+                    case "y":
+                        channel.sendMessage("I am glad that you managed to receieve the support you needed!\n"
+                                + "Can you provide the IDs or `@user`s of all of the users that helped you; "
+                                + "If no users helped you, please reply with `N/A`.").queue();
+                        channelStages.put(channel.getIdLong(),
+                                Pair.of(helpData, Pair.of(closeData.getLeft(), 2)));
+                        break;
+                    case "n":
+                        channel.sendMessage(
+                                "I apologise that you did not receive the support you needed! Lots of people need help and unfortunately, "
+                                        + "we cannot help everyone due to real world circumstances. There are also some problems that "
+                                        + "we may not know how to fix, as not all modders know everything. If you feel that the latter of these "
+                                        + "is the case, you can run `!mmd` or `!forgecord` in #bot-stuff to bring you to a server that "
+                                        + "has a wider range of users with a wider range of knowledge.")
+                                .queue();
+                        closeChannel(channel);
+                        channel.delete().queue();
+                        break;
+                    default:
+                        channel.sendMessage(
+                                "Did you receive the help that you needed from this help channel? (Y/N)")
+                                .queue();
+                        break;
+                }
                 break;
-            }
-
-            final List<Member> members = new ArrayList<>();
-            message.getMentionedMembers().forEach(member -> {
-                if (sentMessage(channel, member.getIdLong())) {
-                    members.add(member);
+            case 2:
+                final String text = message.getContentRaw();
+                if (text.trim().equalsIgnoreCase("n/a")) {
+                    closeChannel(channel);
+                    break;
                 }
-            });
 
-            for (final String argument : message.getContentDisplay().split(" ")) {
-                try {
-                    channel.getGuild().retrieveMemberById(Long.parseLong(argument)).queue(member -> {
-                        if (member != null) {
-                            members.add(member);
-                        }
-                    });
-                } catch (final NumberFormatException ex) {
-                    // Skip (this is only here because I was moaned at for leaving this empty)
+                final List<Member> members = new ArrayList<>();
+                message.getMentionedMembers().forEach(member -> {
+                    if (sentMessage(channel, member.getIdLong())) {
+                        members.add(member);
+                    }
+                });
+
+                for (final String argument : message.getContentDisplay().split(" ")) {
+                    try {
+                        channel.getGuild().retrieveMemberById(Long.parseLong(argument)).queue(member -> {
+                            if (member != null) {
+                                members.add(member);
+                            }
+                        });
+                    } catch (final NumberFormatException ex) {
+                        // Skip (this is only here because I was moaned at for leaving this empty)
+                    }
                 }
-            }
 
-            final List<Member> verifiedMembers = members.stream()
-                    .filter(member -> channel.getPermissionOverrides().stream()
-                            .anyMatch(override -> member.hasAccess(channel) && channel.canTalk(member)))
-                    .collect(Collectors.toList());
-            if (verifiedMembers.isEmpty()) {
-                BotUtils.getModLogChannel(channel.getGuild())
-                        .sendMessage("User (" + ownerID + ") provided no users or invalid users!").queue();
+                final List<Member> verifiedMembers = members.stream()
+                        .filter(member -> channel.getPermissionOverrides().stream()
+                                .anyMatch(override -> member.hasAccess(channel) && channel.canTalk(member)))
+                        .toList();
+                if (verifiedMembers.isEmpty()) {
+                    BotUtils.getModLogChannel(channel.getGuild())
+                            .sendMessage("User (" + ownerID + ") provided no users or invalid users!")
+                            .queue();
+                    closeChannel(channel);
+                    break;
+                }
+
+                verifiedMembers.forEach(member -> {
+                    Constants.LEVELLING_MANAGER.setUserXP(member,
+                            Constants.LEVELLING_MANAGER.getUserXP(member) + Constants.RANDOM.nextInt(25) + 5);
+                    ModdingHelperManager.incrementUser(member.getGuild(), member.getIdLong());
+                });
                 closeChannel(channel);
                 break;
-            }
-
-            verifiedMembers.forEach(member -> {
-                Constants.LEVELLING_MANAGER.setUserXP(member,
-                        Constants.LEVELLING_MANAGER.getUserXP(member) + Constants.RANDOM.nextInt(25) + 5);
-                ModdingHelperManager.incrementUser(member.getIdLong());
-            });
-            closeChannel(channel);
-            break;
-        default:
-            break;
+            default:
+                break;
         }
     }
 
     protected static void createChannel(final Guild guild, final User user, final String description) {
         var complete = false;
         var index = 0;
-        for (final Map<Long, Long> userChannelMap : CHANNEL_SET) {
+        final Set<Map<Long, Long>> channelSet = CoreBotUtils.GUILDS.get(guild.getIdLong()).helpChannels;
+        for (final Map<Long, Long> userChannelMap : channelSet) {
             if (userChannelMap.containsKey(user.getIdLong()) && !guild
                     .getTextChannelsByName(user.getName() + "-" + user.getDiscriminator(), true).isEmpty()) {
                 complete = true;
@@ -172,7 +175,7 @@ public final class HelpManager {
                             .setAllow(Permission.VIEW_CHANNEL).queue();
                     final Map<Long, Long> group1 = new HashMap<>();
                     group1.put(user.getIdLong(), channel.getIdLong());
-                    CHANNEL_SET.add(group1);
+                    channelSet.add(group1);
                 });
     }
 
@@ -190,8 +193,7 @@ public final class HelpManager {
         problemsChannel.getHistory().retrievePast(100).queue(messages -> {
             final List<Message> possibleProblems = messages.stream().filter(m -> !m.getEmbeds().isEmpty())
                     .filter(m -> m.getEmbeds().get(0).getFooter() != null)
-                    .filter(m -> m.getEmbeds().get(0).getFooter().getText().contains(userID))
-                    .collect(Collectors.toList());
+                    .filter(m -> m.getEmbeds().get(0).getFooter().getText().contains(userID)).toList();
 
             if (possibleProblems.isEmpty())
                 return;
@@ -200,7 +202,7 @@ public final class HelpManager {
     }
 
     protected static boolean hasChannel(final Guild guild, final User user) {
-        for (final Map<Long, Long> userMap : CHANNEL_SET) {
+        for (final Map<Long, Long> userMap : CoreBotUtils.GUILDS.get(guild.getIdLong()).helpChannels) {
             if (userMap.containsKey(user.getIdLong())) {
                 if (userMap.get(user.getIdLong()) != 0L
                         && !guild.getTextChannelsByName(user.getName() + "-" + user.getDiscriminator(), true)
@@ -231,8 +233,9 @@ public final class HelpManager {
     }
 
     protected static void removeChannel(final TextChannel channel) {
-        CHANNEL_STAGE_MAP.remove(channel.getIdLong());
-        for (final Map<Long, Long> map : CHANNEL_SET) {
+        CoreBotUtils.GUILDS.get(channel.getGuild().getIdLong()).channelStages.remove(channel.getIdLong());
+        for (final Map<Long, Long> map : CoreBotUtils.GUILDS
+                .get(channel.getGuild().getIdLong()).helpChannels) {
             map.forEach((key, val) -> {
                 if (channel.getIdLong() == key) {
                     map.remove(key);
@@ -265,28 +268,51 @@ public final class HelpManager {
         embed.setDescription(data.getDescription());
         embed.setColor(BotUtils.generateRandomPastelColor());
         embed.setFooter(ownerID);
+
+        boolean mediaFound = false;
+        if (data.getMedia().trim().toLowerCase(Locale.getDefault()).contains("n/a")) {
+            embed.addField("Media:", "No media supplied!", false);
+        } else {
+            mediaFound = true;
+        }
+
+        final boolean logsFound = false;
+        if (data.getLogs().trim().toLowerCase(Locale.getDefault()).contains("empty")
+                || data.getLogs().trim().toLowerCase(Locale.getDefault()).contains("blank")) {
+            embed.addField("Logs:", "Empty/Blank/No Logs", false);
+        }
+
         channel.sendMessageEmbeds(embed.build()).queueAfter(1, TimeUnit.SECONDS);
 
-        channel.sendMessage("Image/Video of the issue: \n" + data.getMedia() + "\n\n"
-                + "Logs relating to the issue: \n" + data.getLogs()).queueAfter(1, TimeUnit.SECONDS);
+        if (mediaFound) {
+            channel.sendMessage("Image/Video of the issue: \n" + data.getMedia()).queueAfter(1,
+                    TimeUnit.SECONDS);
+        }
+
+        if (logsFound) {
+            channel.sendMessage("Logs relating to the issue: \n" + data.getLogs()).queueAfter(1,
+                    TimeUnit.SECONDS);
+        }
     }
 
     protected static void setStage(final TextChannel channel, final long ownerID, final int stage) {
+        final Map<Long, Pair<Pair<HelpData, Integer>, Pair<CloseData, Integer>>> channelStages = CoreBotUtils.GUILDS
+                .get(channel.getGuild().getIdLong()).channelStages;
         channel.getManager().setTopic(ownerID + "\n" + channel.getTopic()).queue();
-        final Pair<Pair<HelpData, Integer>, Pair<CloseData, Integer>> data = CHANNEL_STAGE_MAP
+        final Pair<Pair<HelpData, Integer>, Pair<CloseData, Integer>> data = channelStages
                 .get(channel.getIdLong());
         if (data == null) {
-            CHANNEL_STAGE_MAP.put(channel.getIdLong(), Pair.of(Pair.of(new HelpData(), stage), null));
+            channelStages.put(channel.getIdLong(), Pair.of(Pair.of(new HelpData(), stage), null));
         } else {
-            CHANNEL_STAGE_MAP.put(channel.getIdLong(),
-                    Pair.of(Pair.of(CHANNEL_STAGE_MAP.get(channel.getIdLong()).getLeft().getLeft(),
-                            CHANNEL_STAGE_MAP.get(channel.getIdLong()).getLeft().getRight() + 1),
-                            CHANNEL_STAGE_MAP.get(channel.getIdLong()).getRight()));
+            channelStages.put(channel.getIdLong(),
+                    Pair.of(Pair.of(channelStages.get(channel.getIdLong()).getLeft().getLeft(),
+                            channelStages.get(channel.getIdLong()).getLeft().getRight() + 1),
+                            channelStages.get(channel.getIdLong()).getRight()));
         }
     }
 
     private static void closeChannel(final TextChannel channel) {
-        CHANNEL_STAGE_MAP.remove(channel.getIdLong());
+        removeChannel(channel);
         deleteProblemMessage(channel.getGuild(), channel.getTopic().split("\n")[0]);
         if (channel.getParent() != null) {
             channel.delete().queue();
@@ -319,57 +345,61 @@ public final class HelpManager {
             final var channelID = channel.getIdLong();
             final var message = event.getMessage();
 
+            final Map<Long, Pair<Pair<HelpData, Integer>, Pair<CloseData, Integer>>> channelStages = CoreBotUtils.GUILDS
+                    .get(channel.getGuild().getIdLong()).channelStages;
+
             if (channel.getName().equalsIgnoreCase("request-help")
-                    && !message.getContentRaw().contains("/requesthelp")) {
+                    && message.getContentRaw().startsWith("/requesthelp")) {
                 message.delete().queue();
             }
 
-            if (!channel.getParent().getName().contains(SUPPORT) || event.getAuthor().isBot()
-                    || event.isWebhookMessage() || !CHANNEL_STAGE_MAP.containsKey(channelID))
+            if (channel.getParent() == null || !channel.getParent().getName().contains(SUPPORT)
+                    || event.getAuthor().isBot() || event.isWebhookMessage()
+                    || !channelStages.containsKey(channelID))
                 return;
 
             final String ownerID = channel.getTopic().split("\n")[0];
             if (!event.getAuthor().getId().equalsIgnoreCase(ownerID))
                 return;
 
-            final Pair<HelpData, Integer> data = CHANNEL_STAGE_MAP.get(channelID).getLeft();
+            final Pair<HelpData, Integer> data = channelStages.get(channelID).getLeft();
             final var helpData = data.getLeft();
 
             switch (data.getRight()) {
-            case 0:
-                helpData.setOwner(Long.parseLong(ownerID));
-                helpData.setTitle(channel.getTopic().replace(ownerID + "\n", ""));
-                helpData.setDescription(message.getContentRaw());
-                channel.sendMessage("Please provide an image or video of the issue. "
-                        + "This could be an image in-game, or an image of the error in the code. "
-                        + "If you are unable to provide this information, please respond with `N/A`!")
-                        .queue();
-                CHANNEL_STAGE_MAP.put(channelID,
-                        Pair.of(Pair.of(helpData, 1), CHANNEL_STAGE_MAP.get(channelID).getRight()));
-                break;
-            case 1:
-                helpData.setMedia(message.getEmbeds().isEmpty() ? message.getContentRaw()
-                        : message.getAttachments().get(0).getUrl());
-                channel.sendMessage(
-                        "Please provide the `latest.log`, which can be found in `YourModFolder/run/logs/latest.log`. "
-                                + "If this file does not exist or is empty, please try to re-run the game and check. "
-                                + "If it is still empty, please state that.")
-                        .queue();
-                CHANNEL_STAGE_MAP.put(channelID,
-                        Pair.of(Pair.of(helpData, 2), CHANNEL_STAGE_MAP.get(channelID).getRight()));
-                break;
-            case 2:
-                helpData.setLogs(message.getEmbeds().isEmpty() ? message.getContentRaw()
-                        : message.getAttachments().get(0).getUrl());
-                channel.getHistory().retrievePast(20)
-                        .queue(messages -> channel.deleteMessages(messages).queue());
-                CHANNEL_STAGE_MAP.put(channelID,
-                        Pair.of(Pair.of(helpData, 3), CHANNEL_STAGE_MAP.get(channelID).getRight()));
-                postProblem(event.getGuild(), channelID, helpData);
-                sendFormattedInformation(channel, helpData, ownerID);
-                break;
-            default:
-                break;
+                case 0:
+                    helpData.setOwner(Long.parseLong(ownerID));
+                    helpData.setTitle(channel.getTopic().replace(ownerID + "\n", ""));
+                    helpData.setDescription(message.getContentRaw());
+                    channel.sendMessage("Please provide an image or video of the issue. "
+                            + "This could be an image in-game, or an image of the error in the code. "
+                            + "If you are unable to provide this information, please respond with `N/A`!")
+                            .queue();
+                    channelStages.put(channelID,
+                            Pair.of(Pair.of(helpData, 1), channelStages.get(channelID).getRight()));
+                    break;
+                case 1:
+                    helpData.setMedia(message.getEmbeds().isEmpty() ? message.getContentRaw()
+                            : message.getAttachments().get(0).getUrl());
+                    channel.sendMessage(
+                            "Please provide the `latest.log`, which can be found in `YourModFolder/run/logs/latest.log`. "
+                                    + "If this file does not exist or is empty, please try to re-run the game and check. "
+                                    + "If it is still empty, please state that.")
+                            .queue();
+                    channelStages.put(channelID,
+                            Pair.of(Pair.of(helpData, 2), channelStages.get(channelID).getRight()));
+                    break;
+                case 2:
+                    helpData.setLogs(message.getEmbeds().isEmpty() ? message.getContentRaw()
+                            : message.getAttachments().get(0).getUrl());
+                    channel.getHistory().retrievePast(20)
+                            .queue(messages -> channel.deleteMessages(messages).queue());
+                    channelStages.put(channelID,
+                            Pair.of(Pair.of(helpData, 3), channelStages.get(channelID).getRight()));
+                    postProblem(event.getGuild(), channelID, helpData);
+                    sendFormattedInformation(channel, helpData, ownerID);
+                    break;
+                default:
+                    break;
             }
 
             if (this.closing) {
@@ -379,7 +409,8 @@ public final class HelpManager {
 
         @Override
         public void onTextChannelDelete(final TextChannelDeleteEvent event) {
-            if (CHANNEL_STAGE_MAP.containsKey(event.getChannel().getIdLong())) {
+            if (CoreBotUtils.GUILDS.get(event.getGuild().getIdLong()).channelStages
+                    .containsKey(event.getChannel().getIdLong())) {
                 closeChannel(event.getChannel());
             }
         }

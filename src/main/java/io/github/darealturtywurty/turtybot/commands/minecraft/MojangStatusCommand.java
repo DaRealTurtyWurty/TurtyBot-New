@@ -11,7 +11,7 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandCategory;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
-import io.github.darealturtywurty.turtybot.util.BotUtils;
+import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
@@ -78,7 +78,7 @@ public class MojangStatusCommand implements GuildCommand {
                         .addEmbeds(new EmbedBuilder().setTitle("Mojang Service Status")
                                 .setDescription(msg.toString().trim())
                                 .setColor(BotUtils.generateRandomPastelColor()).build())
-                        .mentionRepliedUser(false).queue();
+                        .queue();
             }
         } catch (IOException | IllegalArgumentException e) {
             ctx.getEvent().deferReply().setContent(

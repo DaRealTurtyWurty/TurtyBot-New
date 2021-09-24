@@ -1,10 +1,10 @@
 package io.github.darealturtywurty.turtybot.managers.music.core;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.github.darealturtywurty.turtybot.util.core.CoreBotUtils;
 import io.github.darealturtywurty.turtybot.util.data.Skip;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
@@ -12,10 +12,8 @@ import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEve
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-// TODO: Maybe save to MongoDB (not sure)
+// TODO: Maybe save to MongoDB
 public class VoiceChannelListener extends ListenerAdapter {
-
-    public static final Set<Skip> SKIPS = new HashSet<>();
 
     @Override
     public void onGuildMessageReactionAdd(final GuildMessageReactionAddEvent event) {
@@ -23,7 +21,8 @@ public class VoiceChannelListener extends ListenerAdapter {
         if (event.getUser().isBot())
             return;
 
-        final Optional<Skip> oSkip = SKIPS.stream()
+        final Set<Skip> skips = CoreBotUtils.GUILDS.get(event.getGuild().getIdLong()).skips;
+        final Optional<Skip> oSkip = skips.stream()
                 .filter(skip -> skip.guildId == event.getGuild().getIdLong()
                         && skip.channelId == event.getChannel().getIdLong()
                         && skip.messageId == event.getMessageIdLong())
@@ -43,7 +42,8 @@ public class VoiceChannelListener extends ListenerAdapter {
                     if (message.get() != null) {
                         message.get().delete().queue();
                     }
-                    SKIPS.remove(skip);
+
+                    skips.remove(skip);
                 }
             }
         }
@@ -55,7 +55,8 @@ public class VoiceChannelListener extends ListenerAdapter {
         if (event.getUser().isBot())
             return;
 
-        final Optional<Skip> oSkip = SKIPS.stream()
+        final Set<Skip> skips = CoreBotUtils.GUILDS.get(event.getGuild().getIdLong()).skips;
+        final Optional<Skip> oSkip = skips.stream()
                 .filter(skip -> skip.guildId == event.getGuild().getIdLong()
                         && skip.channelId == event.getChannel().getIdLong()
                         && skip.messageId == event.getMessageIdLong())
@@ -73,7 +74,7 @@ public class VoiceChannelListener extends ListenerAdapter {
                 }
 
                 if (message.get() == null) {
-                    SKIPS.remove(skip);
+                    skips.remove(skip);
                 }
             }
         }
@@ -86,7 +87,7 @@ public class VoiceChannelListener extends ListenerAdapter {
                 .getAudioManager().getConnectedChannel().getIdLong() == event.getChannelLeft().getIdLong()
                 && event.getChannelLeft().getMembers().size() <= 1) {
             event.getGuild().getAudioManager().closeAudioConnection();
-            MusicManager.MUSIC_MANAGERS.get(event.getGuild().getIdLong()).scheduler.getQueue().clear();
+            MusicManager.getMusicManager(event.getGuild()).scheduler.getQueue().clear();
         }
     }
 }
