@@ -43,4 +43,14 @@ public class MemeCommand extends BaseRedditCommand {
     public boolean productionReady() {
         return true;
     }
+
+    @Override
+    protected boolean noEmbed() {
+        return false;
+    }
+
+    @Override
+    protected boolean shouldReply() {
+        return true;
+    }
 }

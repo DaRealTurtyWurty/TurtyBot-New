@@ -3,6 +3,7 @@ package io.github.darealturtywurty.turtybot.commands.core;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import io.github.darealturtywurty.turtybot.commands.nsfw.NSFWInitializer;
 import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import io.github.darealturtywurty.turtybot.util.core.CoreBotUtils;
 import net.dv8tion.jda.api.entities.Guild;
@@ -19,25 +20,36 @@ public class CommandHook extends ListenerAdapter {
 
     @Override
     public void onGuildReady(final GuildReadyEvent event) {
-        super.onGuildReady(event);
         final Guild guild = event.getGuild();
-        guild.loadMembers();
+        this.readTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println(guild.getName());
+                guild.loadMembers().onSuccess(members -> System.out
+                        .println(members.size() + " Members loaded for guild: " + guild.getName()));
+                NSFWInitializer.init(guild.getIdLong());
+                CoreBotUtils.readGuildInfo(guild);
+            }
+        }, 5000);
 
         final CommandListUpdateAction updates = guild.updateCommands();
         updates.addCommands(this.manager.commands.stream().filter(cmd -> {
             if (cmd.productionReady() || !BotUtils.notTestServer(guild))
                 return true;
             return false;
-        }).map(cmd -> new CommandData(cmd.getName(), cmd.getDescription()).addOptions(cmd.getOptions()))
-                .toList());
-        updates.queue();
-
-        this.readTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                CoreBotUtils.readGuildInfo(event.getJDA());
+        }).map(cmd -> {
+            final CommandData data = new CommandData(cmd.getName(), cmd.getDescription());
+            if (!cmd.getSubcommandGroupData().isEmpty()) {
+                data.addSubcommandGroups(cmd.getSubcommandGroupData());
+            } else if (!cmd.getSubcommandData().isEmpty()) {
+                data.addSubcommands(cmd.getSubcommandData());
+            } else if (!cmd.getOptions().isEmpty()) {
+                data.addOptions(cmd.getOptions());
             }
-        }, 5000);
+
+            return data;
+        }).toList());
+        updates.queue();
     }
 
     @Override

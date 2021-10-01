@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
 public interface GuildCommand {
 
@@ -25,6 +26,10 @@ public interface GuildCommand {
     List<OptionData> getOptions();
 
     default List<SubcommandData> getSubcommandData() {
+        return List.of();
+    }
+
+    default List<SubcommandGroupData> getSubcommandGroupData() {
         return List.of();
     }
 

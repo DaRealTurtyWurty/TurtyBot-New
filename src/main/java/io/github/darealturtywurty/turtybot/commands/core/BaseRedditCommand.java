@@ -98,12 +98,24 @@ public abstract class BaseRedditCommand implements RedditCommand {
         embed.setFooter(ctx.getAuthor().getName() + "#" + ctx.getAuthor().getDiscriminator(),
                 ctx.getAuthor().getEffectiveAvatarUrl());
         if (!url.endsWith("mp4") && !url.endsWith("mov") && !url.endsWith("wmv") && !url.endsWith("avi")
-                && !url.endsWith("flv") && !url.endsWith("webm") && !url.endsWith("mkv")) {
+                && !url.endsWith("flv") && !url.endsWith("webm") && !url.endsWith("mkv") && !noEmbed()) {
             embed.setImage(url);
-            ctx.getEvent().deferReply().addEmbeds(embed.build()).queue();
+            embed.setDescription("Not loading? [Click Me](" + url + ")");
+            if (shouldReply()) {
+                ctx.getEvent().deferReply().addEmbeds(embed.build()).queue();
+            } else {
+                ctx.getEvent().deferReply(true).setContent("Sent!").queue();
+                ctx.getChannel().sendMessageEmbeds(embed.build()).queue();
+            }
+        } else if (shouldReply()) {
+            ctx.getEvent().deferReply().setContent(url).queue();
         } else {
-            ctx.getEvent().deferReply().addEmbeds(embed.build())
-                    .queue(hook -> hook.editOriginal(url).queue());
+            ctx.getEvent().deferReply(true).setContent("Sent!").queue();
+            ctx.getChannel().sendMessage(url).queue();
         }
     }
+
+    protected abstract boolean noEmbed();
+
+    protected abstract boolean shouldReply();
 }
