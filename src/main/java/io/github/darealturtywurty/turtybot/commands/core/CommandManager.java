@@ -21,6 +21,7 @@ import org.reflections.util.FilterBuilder;
 import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import io.github.darealturtywurty.turtybot.util.core.CoreBotUtils;
 import io.github.darealturtywurty.turtybot.util.data.GuildInfo;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 public class CommandManager {
@@ -81,7 +82,7 @@ public class CommandManager {
             allowed = true;
         }
 
-        if ((!command.isNSFW() || !((GuildCommand) event.getChannel()).isNSFW()) && command.isNSFW()) {
+        if ((!command.isNSFW() || !((TextChannel) event.getChannel()).isNSFW()) && command.isNSFW()) {
             allowed = false;
         }
 

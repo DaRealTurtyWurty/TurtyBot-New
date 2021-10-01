@@ -8,6 +8,7 @@ import io.github.darealturtywurty.turtybot.commands.core.CommandManager;
 import io.github.darealturtywurty.turtybot.commands.core.CoreCommandContext;
 import io.github.darealturtywurty.turtybot.commands.core.GuildCommand;
 import io.github.darealturtywurty.turtybot.commands.core.RegisterBotCmd;
+import io.github.darealturtywurty.turtybot.commands.nsfw.NSFWCommandListener;
 import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -68,9 +69,38 @@ public class CommandListCommand implements GuildCommand {
             embed.setTitle("Commands in category: " + category);
 
             final var strBuilder = new StringBuilder();
+            if (category.equals(CommandCategory.NSFW)) {
+                NSFWCommandListener.COMMANDS.get(ctx.getGuild().getIdLong()).stream()
+                        .forEach(cmd -> strBuilder.append("`!" + cmd.name + "`, "));
+            }
+
             this.commandManager.commands.stream().filter(cmd -> cmd.getCategory() == category)
                     .filter(Objects::nonNull).sorted((cmd1, cmd2) -> cmd1.getName().compareTo(cmd2.getName()))
-                    .forEach(cmd -> strBuilder.append("`" + cmd.getName() + "`, "));
+                    .forEach(cmd -> {
+                        if (!cmd.getSubcommandGroupData().isEmpty()) {
+                            cmd.getSubcommandGroupData().stream()
+                                    .sorted((group1, group2) -> group1.getName().compareTo(group2.getName()))
+                                    .forEach(groupData -> {
+                                        if (!groupData.getSubcommands().isEmpty()) {
+                                            groupData.getSubcommands().stream().sorted(
+                                                    (sub1, sub2) -> sub1.getName().compareTo(sub2.getName()))
+                                                    .forEach(subcommand -> strBuilder.append(
+                                                            "\n`" + cmd.getName() + " " + groupData.getName()
+                                                                    + " " + subcommand.getName() + "`, "));
+                                        } else {
+                                            strBuilder.append("\n`" + cmd.getName() + " "
+                                                    + groupData.getName() + "`, ");
+                                        }
+                                    });
+                        } else if (!cmd.getSubcommandData().isEmpty()) {
+                            cmd.getSubcommandData().stream()
+                                    .sorted((sub1, sub2) -> sub1.getName().compareTo(sub2.getName()))
+                                    .forEach(subcommand -> strBuilder.append(
+                                            "`" + cmd.getName() + " " + subcommand.getName() + "`, "));
+                        } else {
+                            strBuilder.append("`" + cmd.getName() + "`, ");
+                        }
+                    });
             if (strBuilder.lastIndexOf(",") != -1) {
                 strBuilder.deleteCharAt(strBuilder.lastIndexOf(","));
             }

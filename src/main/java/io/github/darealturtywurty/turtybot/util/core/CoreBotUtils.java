@@ -21,7 +21,7 @@ import io.github.darealturtywurty.turtybot.util.data.GuildInfo;
 import io.github.darealturtywurty.turtybot.util.data.ShowcaseInfo;
 import io.github.darealturtywurty.turtybot.util.data.UserWarns;
 import io.github.darealturtywurty.turtybot.util.math.Triple;
-import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 
 public final class CoreBotUtils {
     private static final Path GUILD_INFO = Path.of("guildInfo.json");
@@ -34,15 +34,13 @@ public final class CoreBotUtils {
         throw new IllegalAccessError("Attempted to construct utility class!");
     }
 
-    public static void readGuildInfo(final JDA bot) {
+    public static void readGuildInfo(final Guild guild) {
         try {
             if (!Files.exists(GUILD_INFO))
                 return;
             final JsonArray json = GSON.fromJson(Files.readString(GUILD_INFO), JsonArray.class);
             for (var guildIndex = 0; guildIndex < json.size(); guildIndex++) {
                 final var guildObject = json.get(guildIndex).getAsJsonObject();
-                final var guild = bot.getGuildById(
-                        getOrDefaultJson(guildObject, "GuildID", 819294753732296776L).getAsLong());
                 final var info = new GuildInfo(guild);
                 info.prefix = getOrDefaultJson(guildObject, "Prefix", "!").getAsString();
                 info.modRoleID = getOrDefaultJson(guildObject, "ModeratorRoleID", 819294753732296776L)

@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 public enum CommandCategory {
 
     FUN("Fun", "🎉"), MINECRAFT("Minecraft", "🧊"), MODERATION("Moderation", "🔨"), MUSIC("Music", "🎵"),
-    UTILITY("Utility", "🧰"), RANDOM("Random", "🛋");
+    UTILITY("Utility", "🧰"), RANDOM("Random", "🛋"), NSFW("NSFW", "😏");
 
     public final String emoji, name;
 
