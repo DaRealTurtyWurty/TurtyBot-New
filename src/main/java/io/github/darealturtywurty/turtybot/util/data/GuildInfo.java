@@ -25,7 +25,6 @@ public class GuildInfo {
     public final Map<Long, ShowcaseInfo> showcaseInfos = new HashMap<>();
     public final Map<Long, StarStats> userStarStats = new HashMap<>();
     public final Map<Long, Pair<Integer, Integer>> moddingHelpers = new HashMap<>();
-    public final Map<Long, Pair<Pair<HelpData, Integer>, Pair<CloseData, Integer>>> channelStages = new HashMap<>();
     public final Map<Long, List<Long>> messagesByChannel = new HashMap<>();
     public final Map<Long, Set<Long>> mutedUserRoles = new HashMap<>();
     public final Map<Long, UserEmbedData> userEmbeds = new HashMap<>();
