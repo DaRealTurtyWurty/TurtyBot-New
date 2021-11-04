@@ -12,41 +12,43 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.google.guava:guava:28.2-jre'
+    implementation 'com.google.guava:guava:latest.release'
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:latest.release'
     
-    implementation group: 'net.dv8tion', name: 'JDA', version: '4.3.0_331'
+    implementation group: 'net.dv8tion', name: 'JDA', version: 'latest.release'
     
-    implementation group: 'com.typesafe', name: 'config', version: '1.4.1'
+    implementation group: 'com.typesafe', name: 'config', version: 'latest.release'
     
-    implementation group: 'io.vavr', name: 'vavr', version: '1.0.0-alpha-3'
+    implementation group: 'io.vavr', name: 'vavr', version: 'latest.release'
     
-	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+	implementation group: 'com.google.code.gson', name: 'gson', version: 'latest.release'
 	
-	implementation group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
+	implementation group: 'org.apache.commons', name: 'commons-io', version: 'latest.release'
 	
-	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: 'latest.release'
 	
-	implementation group: 'org.eclipse.mylyn.github', name: 'org.eclipse.egit.github.core', version: '2.1.5'
+	implementation group: 'org.eclipse.mylyn.github', name: 'org.eclipse.egit.github.core', version: 'latest.release'
 	
-	implementation group: 'org.mongodb', name: 'mongodb-driver-sync', version: '4.2.3'
+	implementation group: 'org.mongodb', name: 'mongodb-driver-sync', version: 'latest.release'
 	
-	implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
+	implementation group: 'org.slf4j', name: 'slf4j-simple', version: 'latest.release'
 	
-	implementation group: 'com.vdurmont', name: 'emoji-java', version: '5.1.1'
+	implementation group: 'com.vdurmont', name: 'emoji-java', version: 'latest.release'
 	
-	implementation group: 'com.sedmelluq', name: 'lavaplayer', version: '1.3.78'
+	implementation group: 'com.sedmelluq', name: 'lavaplayer', version: 'latest.release'
 	
-	implementation group: 'com.github.natanbc', name: 'lavadsp', version: '0.7.7'
+	implementation group: 'com.github.natanbc', name: 'lavadsp', version: 'latest.release'
 	
-	implementation group: 'net.dean.jraw', name: 'JRAW', version: '1.1.0'
+	implementation group: 'net.dean.jraw', name: 'JRAW', version: 'latest.release'
 	
-	implementation group: 'com.graphql-java', name: 'graphql-java', version: '17.0'
+	implementation group: 'com.graphql-java', name: 'graphql-java', version: 'latest.release'
 	
-	implementation group: 'org.reflections', name: 'reflections', version: '0.9.12'
+	implementation group: 'org.reflections', name: 'reflections', version: 'latest.release'
 	
-	implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.0'
+	implementation group: 'org.jfree', name: 'jfreechart', version: 'latest.release'
 	
-	implementation group: 'com.jhlabs', name: 'filters', version: '2.0.235-1'
+	implementation group: 'com.jhlabs', name: 'filters', version: 'latest.release'
+	
+	implementation group: 'com.object-refinery', name: 'orsoncharts', version: 'latest.release'
 }

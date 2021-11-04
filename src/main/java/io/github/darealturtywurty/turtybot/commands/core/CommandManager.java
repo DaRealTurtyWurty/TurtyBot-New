@@ -12,8 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.scanners.Scanners;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
@@ -49,7 +48,7 @@ public class CommandManager {
     public void registerCommands() {
         final var reflections = new Reflections(new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage("io.github.darealturtywurty.turtybot"))
-                .setScanners(new SubTypesScanner(), new TypeAnnotationsScanner())
+                .setScanners(Scanners.SubTypes, Scanners.TypesAnnotated)
                 .filterInputsBy(new FilterBuilder().includePackage("io.github.darealturtywurty.turtybot")));
         reflections.getTypesAnnotatedWith(RegisterBotCmd.class).forEach(command -> {
             try {

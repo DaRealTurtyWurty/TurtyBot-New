@@ -33,22 +33,19 @@ public class CommandHook extends ListenerAdapter {
         }, 5000);
 
         final CommandListUpdateAction updates = guild.updateCommands();
-        updates.addCommands(this.manager.commands.stream().filter(cmd -> {
-            if (cmd.productionReady() || !BotUtils.notTestServer(guild))
-                return true;
-            return false;
-        }).map(cmd -> {
-            final CommandData data = new CommandData(cmd.getName(), cmd.getDescription());
-            if (!cmd.getSubcommandGroupData().isEmpty()) {
-                data.addSubcommandGroups(cmd.getSubcommandGroupData());
-            } else if (!cmd.getSubcommandData().isEmpty()) {
-                data.addSubcommands(cmd.getSubcommandData());
-            } else if (!cmd.getOptions().isEmpty()) {
-                data.addOptions(cmd.getOptions());
-            }
+        updates.addCommands(this.manager.commands.stream()
+                .filter(cmd -> cmd.productionReady() || !BotUtils.notTestServer(guild)).map(cmd -> {
+                    final CommandData data = new CommandData(cmd.getName(), cmd.getDescription());
+                    if (!cmd.getSubcommandGroupData().isEmpty()) {
+                        data.addSubcommandGroups(cmd.getSubcommandGroupData());
+                    } else if (!cmd.getSubcommandData().isEmpty()) {
+                        data.addSubcommands(cmd.getSubcommandData());
+                    } else if (!cmd.getOptions().isEmpty()) {
+                        data.addOptions(cmd.getOptions());
+                    }
 
-            return data;
-        }).toList());
+                    return data;
+                }).toList());
         updates.queue();
     }
 

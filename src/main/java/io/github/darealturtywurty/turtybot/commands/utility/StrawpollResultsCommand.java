@@ -38,9 +38,12 @@ public class StrawpollResultsCommand implements GuildCommand {
 
     private static final int WIDTH = 1080, HEIGHT = 720;
 
-    public static JFreeChart createChart(final PieDataset dataset, final String title, final boolean is3D) {
+    @SuppressWarnings("deprecation")
+    public static JFreeChart createChart(final PieDataset<String> dataset, final String title,
+            final boolean is3D) {
         JFreeChart chart;
         if (is3D) {
+            // TODO: Rewrite this to use the new library
             chart = ChartFactory.createPieChart3D(title, dataset, false, true, Locale.getDefault());
         } else {
             chart = ChartFactory.createPieChart(title, dataset, false, true, Locale.getDefault());
@@ -48,8 +51,8 @@ public class StrawpollResultsCommand implements GuildCommand {
         return chart;
     }
 
-    public static PieDataset createDataset(final Map<String, Double> data) {
-        final var dataset = new DefaultPieDataset();
+    public static PieDataset<String> createDataset(final Map<String, Double> data) {
+        final var dataset = new DefaultPieDataset<String>();
         data.forEach(dataset::setValue);
         return dataset;
     }
@@ -106,7 +109,7 @@ public class StrawpollResultsCommand implements GuildCommand {
                 answerMap.put(answer.get("answer").getAsString(), (double) answer.get("votes").getAsInt());
             }
 
-            final PieDataset dataset = createDataset(answerMap);
+            final PieDataset<String> dataset = createDataset(answerMap);
             final JFreeChart chart = createChart(dataset, response.get("title").getAsString(), is3D);
             final BufferedImage chartImg = drawChart(chart);
             final InputStream chartStream = ImageUtils.toInputStream(chartImg);

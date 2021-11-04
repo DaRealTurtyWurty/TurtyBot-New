@@ -49,7 +49,7 @@ public class GuildInfo {
     public long modRoleID, advModderRoleID, mutedRoleID;
 
     // Channels
-    public long modLogID, showcasesID, starboardID, suggestionsID;
+    public long modLogID, showcasesID, starboardID, suggestionsID, informationID;
 
     // Warnings
     public int muteThreshold = 2, kickThreshold = 3, banThreshold = 5;

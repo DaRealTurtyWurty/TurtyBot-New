@@ -107,7 +107,7 @@ public class CommandListCommand implements GuildCommand {
 
             embed.setDescription(strBuilder.toString());
             embed.setColor(BotUtils.generateRandomPastelColor());
-            ctx.getEvent().deferReply(true).addEmbeds(embed.build()).mentionRepliedUser(false).queue();
+            ctx.getEvent().deferReply(true).addEmbeds(embed.build()).queue();
         } else {
             ctx.getEvent().deferReply(true)
                     .setContent(

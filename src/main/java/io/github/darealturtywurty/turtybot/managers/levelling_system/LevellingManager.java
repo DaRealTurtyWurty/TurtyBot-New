@@ -36,6 +36,17 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class LevellingManager extends ListenerAdapter {
 
+    private static final String[] LEVELUP_MESSAGES = new String[] {
+            "Congrats, %s, you levelled up to level: %s! 🎉",
+            "Poggers, %s, you are now level: %s! <:pog:728016203502846032>",
+            "%s Yooooo! You are now level: %s!", "GG, %s. You are now level: %s! 😎" };
+    private static final String[] NSFW_LEVELUP_MESSAGES = new String[] {
+            "%s Hey sexy! You levelled up to level: %s 😩",
+            "%s Why don't you fuck me, now that you are level: %s? <:lipbite:902605587664232518>",
+            "Aughhh 😩. You are so hot, %s. I wish I was level: %s.",
+            "%s, my pussy is getting wet 💦! Since you are now level: %s, why dont you stick it in?",
+            "Aowh yea, oh that feels good. I think you are going to make me cum 💦, %s. But clearly not before you are level: %s!" };
+
     private final MongoDatabase database;
 
     public LevellingManager() {
@@ -47,6 +58,15 @@ public class LevellingManager extends ListenerAdapter {
 
     public static int getLevelForXP(final int xp) {
         return (int) ((-25 + Math.sqrt(5 * (120 + xp))) / 5);
+    }
+
+    public static String getLevelupMessage(final Member member, final TextChannel channel,
+            final int newLevel) {
+        return String.format(
+                channel.isNSFW()
+                        ? NSFW_LEVELUP_MESSAGES[Constants.RANDOM.nextInt(NSFW_LEVELUP_MESSAGES.length)]
+                        : LEVELUP_MESSAGES[Constants.RANDOM.nextInt(LEVELUP_MESSAGES.length)],
+                member.getAsMention(), newLevel);
     }
 
     public static int getXPForLevel(final int level) {
@@ -186,18 +206,17 @@ public class LevellingManager extends ListenerAdapter {
             final int level = getLevelForXP(getUserXP(member));
             setUserXP(member, getUserXP(member)
                     + Math.round((Constants.RANDOM.nextInt(25) + 5) * boostMultiplier * messageMultiplier));
-            setUserCooldown(member.getGuild().getIdLong(), member.getIdLong(), 15);
+            // setUserCooldown(member.getGuild().getIdLong(), member.getIdLong(), 15);
             final int newLevel = getLevelForXP(getUserXP(member));
             if (newLevel > level) {
-                message.getChannel().sendMessage("Congrats " + member.getAsMention()
-                        + " you levelled up to level: " + newLevel + "! 🎉").queue();
+                message.getChannel()
+                        .sendMessage(getLevelupMessage(member, message.getTextChannel(), newLevel)).queue();
                 if (newLevel % 5 == 0) {
                     final var card = getOrCreateCard(member);
                     card.inventory.addItem(ItemRegistry.scaledRandom(), (TextChannel) message.getChannel());
                 }
             }
         }
-
     }
 
     public void setUserCooldown(final long guildID, final long userID, final int cooldown) {

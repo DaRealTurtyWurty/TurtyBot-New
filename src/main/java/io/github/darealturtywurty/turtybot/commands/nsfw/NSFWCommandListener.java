@@ -70,7 +70,7 @@ public class NSFWCommandListener extends ListenerAdapter {
 
         final String url = post.getSubject().getUrl().isBlank() ? post.getSubject().getThumbnail()
                 : post.getSubject().getUrl();
-        message.getTextChannel().sendMessage(url).queue();
+        message.getTextChannel().sendMessage(url).queue(msg -> message.delete().queue());
     }
 
     @Nullable
@@ -121,7 +121,7 @@ public class NSFWCommandListener extends ListenerAdapter {
                             .sendMessageEmbeds(
                                     new EmbedBuilder().setColor(BotUtils.generateRandomPastelColor())
                                             .setTimestamp(Instant.now()).setImage(url).build())
-                            .queue();
+                            .queue(msg -> event.getMessage().delete().queue());
                 } catch (final IOException e) {
                     final var strBuilder = new StringBuilder("```\n");
                     strBuilder.append(e.getLocalizedMessage() + "\n");
@@ -133,7 +133,7 @@ public class NSFWCommandListener extends ListenerAdapter {
                     event.getChannel().sendMessage(
                             "There was an issue retrieving hentai. Please report the following error to the bot owner:\n"
                                     + strBuilder.toString())
-                            .queue();
+                            .queue(msg -> event.getMessage().delete().queue());
                 }
                 return;
             }

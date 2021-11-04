@@ -139,6 +139,40 @@ public final class BotUtils {
         return Constants.CONFIG.getConfig("important");
     }
 
+    public static TextChannel getInformationChannel(final Guild guild) {
+        var channelID = 0L;
+        try {
+            channelID = getInformationFromGuild(guild);
+        } catch (final ConfigException.Missing e) {
+            LOGGER.log(Level.INFO, "No Information Channel found in config for guild: {0} [{1}]!",
+                    new Object[] { guild.getName(), guild.getId() });
+        }
+
+        if (channelID <= 0) {
+            final var channel = guild.getTextChannelsByName("📧information", true).get(0);
+            if (channel == null) {
+                LOGGER.log(Level.WARNING, "No Information Channel found in guild: {0} [{1}]!",
+                        new Object[] { guild.getName(), guild.getId() });
+                return null;
+            }
+            channelID = channel.getIdLong();
+        }
+
+        setInformationForGuild(guild, channelID);
+
+        final var informationChannel = guild.getTextChannelById(channelID);
+        if (informationChannel == null) {
+            LOGGER.log(Level.WARNING, "No Information Channel found in guild: {0} [{1}]!",
+                    new Object[] { guild.getName(), guild.getId() });
+            return null;
+        }
+        return informationChannel;
+    }
+
+    public static long getInformationFromGuild(final Guild guild) {
+        return CoreBotUtils.GUILDS.get(guild.getIdLong()).informationID;
+    }
+
     public static int getKickThreshold(final Guild guild) {
         return CoreBotUtils.GUILDS.get(guild.getIdLong()) == null ? 3
                 : CoreBotUtils.GUILDS.get(guild.getIdLong()).kickThreshold;
@@ -569,6 +603,14 @@ public final class BotUtils {
             maxWarns = kickThreshold + 1;
         }
         info.banThreshold = maxWarns;
+        CoreBotUtils.GUILDS.put(guild.getIdLong(), info);
+        CoreBotUtils.writeGuildInfo();
+    }
+
+    public static void setInformationForGuild(final Guild guild, final long channelID) {
+        final GuildInfo info = CoreBotUtils.GUILDS.get(guild.getIdLong()) == null ? new GuildInfo(guild)
+                : CoreBotUtils.GUILDS.get(guild.getIdLong());
+        info.informationID = channelID;
         CoreBotUtils.GUILDS.put(guild.getIdLong(), info);
         CoreBotUtils.writeGuildInfo();
     }
