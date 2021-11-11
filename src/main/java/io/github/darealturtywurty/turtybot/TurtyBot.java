@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import io.github.darealturtywurty.turtybot.commands.core.CommandHook;
 import io.github.darealturtywurty.turtybot.commands.nsfw.NSFWCommandListener;
+import io.github.darealturtywurty.turtybot.commands.nsfw.Rule34Command;
 import io.github.darealturtywurty.turtybot.managers.auto_mod.AutoModerator;
 import io.github.darealturtywurty.turtybot.managers.music.core.MusicManager;
 import io.github.darealturtywurty.turtybot.managers.music.core.VoiceChannelListener;
@@ -26,8 +27,8 @@ public class TurtyBot {
 
     private TurtyBot(final JDA bot) {
         bot.addEventListener(new StarboardManager(), Constants.LEVELLING_MANAGER, new VoiceChannelListener(),
-                new AutoModerator(), new PollCommand(), new SuggestionManager(bot),
-                new NSFWCommandListener());
+                new AutoModerator(), new PollCommand(), new SuggestionManager(bot), new NSFWCommandListener(),
+                new Rule34Command());
         Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
         MusicManager.register();
         Locale.setDefault(Locale.UK);

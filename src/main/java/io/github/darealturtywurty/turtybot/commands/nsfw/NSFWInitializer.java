@@ -121,6 +121,7 @@ public final class NSFWInitializer {
                 "ApexLegends_Porn", "Rule34ApexLegends");
         new BaseNSFWCommand(guildId, "zelda", "The legend came true!", "Zelda_Romance");
         new BaseNSFWCommand(guildId, "3d", "Some 3D Porn!", "nsfw_3D_porn");
+        new BaseNSFWCommand(guildId, "paladins", "Paladins...", "Paladins_Porn");
         new BaseNSFWCommand(guildId, "random", "Some real random shit, could be literally anything NSFW",
                 "gonewild", "nsfw", "RealGirls", "NSFW_GIF", "holdthemoan", "BustyPetite", "cumsluts",
                 "PetiteGoneWild", "adorableporn", "nsfw_gifs", "GirlsFinishingTheJob", "AsiansGoneWild",
@@ -576,8 +577,8 @@ public final class NSFWInitializer {
                 "superheroinesdefeated", "ForeheadCum", "leotardsex", "retrousse_nose", "fyiff",
                 "NickeyHuntsman", "Alyssa_Arce", "CumSelfie", "bathroomselfies", "seatbelteffect",
                 "ringlightporn", "BetterThanPorn", "Stripping", "casualdickholding", "Tittybombing",
-                "oralfrombehind", "mistygates", "WickedWeasel", "Paladins_Porn", "DarkSkinHentai",
-                "AllysonBettie", "WeddingRingShowing", "NaughtyFrenchie", "Violet_Starr", "SweatyGirls_NSFW",
+                "oralfrombehind", "mistygates", "WickedWeasel", "DarkSkinHentai", "AllysonBettie",
+                "WeddingRingShowing", "NaughtyFrenchie", "Violet_Starr", "SweatyGirls_NSFW",
                 "JuicyBrazilians", "BringHerToHeaven", "JuicyBabes", "HogwartsGoneWild", "fashionextramile",
                 "BrittanyElizabeth", "kbj", "StefanieKnight", "SnapchatPremiums", "fortnitegonewild",
                 "highwaistedthongs", "PizzaThot", "Redheadass", "bestofboobies", "agedlikefinewine",

@@ -135,6 +135,15 @@ public final class BotUtils {
         }
     }
 
+    public static String getImgurKey() {
+        try {
+            return getImportantConfig().getString("ImgurKey");
+        } catch (final ConfigException.Missing e) {
+            LOGGER.log(Level.WARNING, "No Imgur Auth Key found in config!");
+            throw new IllegalArgumentException(e);
+        }
+    }
+
     public static Config getImportantConfig() {
         return Constants.CONFIG.getConfig("important");
     }

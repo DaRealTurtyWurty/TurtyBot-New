@@ -4,6 +4,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import io.github.darealturtywurty.turtybot.commands.nsfw.NSFWInitializer;
+import io.github.darealturtywurty.turtybot.managers.autoposter.Autoposter;
+import io.github.darealturtywurty.turtybot.managers.autoposter.AutoposterCommand;
 import io.github.darealturtywurty.turtybot.util.core.BotUtils;
 import io.github.darealturtywurty.turtybot.util.core.CoreBotUtils;
 import net.dv8tion.jda.api.entities.Guild;
@@ -16,11 +18,17 @@ import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 public class CommandHook extends ListenerAdapter {
 
     protected final CommandManager manager = new CommandManager();
+    private AutoposterCommand autoposterCommand;
     private final Timer readTimer = new Timer();
 
     @Override
     public void onGuildReady(final GuildReadyEvent event) {
         final Guild guild = event.getGuild();
+        if (this.autoposterCommand == null) {
+            this.autoposterCommand = new AutoposterCommand(this.manager);
+            event.getJDA().addEventListener(new AutoposterCommand(this.manager));
+        }
+
         this.readTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -29,6 +37,7 @@ public class CommandHook extends ListenerAdapter {
                         .println(members.size() + " Members loaded for guild: " + guild.getName()));
                 NSFWInitializer.init(guild.getIdLong());
                 CoreBotUtils.readGuildInfo(guild);
+                Autoposter.Manager.init();
             }
         }, 5000);
 

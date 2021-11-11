@@ -1,6 +1,7 @@
 package io.github.darealturtywurty.turtybot.commands.nsfw;
 
 import java.io.IOException;
+import java.net.URL;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +10,9 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -52,25 +56,77 @@ public class NSFWCommandListener extends ListenerAdapter {
         NSFWCommandListener.redditClient.setLogHttp(false);
     }
 
-    protected static String getRandomSubreddit(final Set<String> subreddits) {
-        return subreddits.stream().skip(ThreadLocalRandom.current().nextInt(subreddits.size())).findFirst()
-                .orElse("beans");
-    }
-
-    private static void execute(final BaseNSFWCommand command, final Message message) {
+    public static void execute(final BaseNSFWCommand command, final TextChannel channel,
+            @Nullable final Message message) {
         if (command.subreddits.isEmpty())
             throw new SubredditMissingException(
                     "Command by name \"" + command.name + "\" is missing subreddits!");
         final String subreddit = getRandomSubreddit(command.subreddits);
-        final RootCommentNode post = getPost(command.subreddits, message.getTextChannel(), subreddit);
+        final RootCommentNode post = getPost(command.subreddits, channel, subreddit);
         if (post == null) {
-            execute(command, message);
+            execute(command, channel, message);
             return;
         }
 
         final String url = post.getSubject().getUrl().isBlank() ? post.getSubject().getThumbnail()
                 : post.getSubject().getUrl();
-        message.getTextChannel().sendMessage(url).queue(msg -> message.delete().queue());
+        if (url.contains("imgur")) {
+            try {
+                final var baos = new ByteArrayOutputStream();
+                ImageIO.write(ImageIO.read(new URL(url)), "jpg", baos);
+                channel.sendFile(baos.toByteArray(), "beans.jpg").queue();
+                return;
+            } catch (final IOException exception) {
+                exception.printStackTrace();
+                channel.sendMessage(url).queue(msg -> {
+                    if (message != null) {
+                        message.delete().queue();
+                    }
+                });
+                return;
+            }
+        }
+        channel.sendMessage(url).queue(msg -> {
+            if (message != null) {
+                message.delete().queue();
+            }
+        });
+    }
+
+    public static void sendHentai(final TextChannel channel, @Nullable final Message message) {
+        final var request = new Request.Builder().url("https://nekobot.xyz/api/image?type=hentai").build();
+
+        try (var response = HTTP_CLIENT.newCall(request).execute()) {
+            final var url = GSON.fromJson(response.body().string(), JsonObject.class).get("message")
+                    .getAsString();
+            channel.sendMessageEmbeds(new EmbedBuilder().setColor(BotUtils.generateRandomPastelColor())
+                    .setTimestamp(Instant.now()).setImage(url).build()).queue(msg -> {
+                        if (message != null) {
+                            message.delete().queue();
+                        }
+                    });
+        } catch (final IOException e) {
+            final var strBuilder = new StringBuilder("```\n");
+            strBuilder.append(e.getLocalizedMessage() + "\n");
+            for (final StackTraceElement el : e.getStackTrace()) {
+                strBuilder.append(el.toString());
+            }
+            strBuilder.append("```");
+
+            channel.sendMessage(
+                    "There was an issue retrieving hentai. Please report the following error to the bot owner:\n"
+                            + strBuilder.toString())
+                    .queue(msg -> {
+                        if (message != null) {
+                            message.delete().queue();
+                        }
+                    });
+        }
+    }
+
+    protected static String getRandomSubreddit(final Set<String> subreddits) {
+        return subreddits.stream().skip(ThreadLocalRandom.current().nextInt(subreddits.size())).findFirst()
+                .orElse("beans");
     }
 
     @Nullable
@@ -111,36 +167,13 @@ public class NSFWCommandListener extends ListenerAdapter {
                 && event.getChannel().isNSFW() && COMMANDS.containsKey(event.getGuild().getIdLong())) {
             final String commandName = content.substring(1);
             if (commandName.equalsIgnoreCase("hentai")) {
-                final var request = new Request.Builder().url("https://nekobot.xyz/api/image?type=hentai")
-                        .build();
-
-                try (var response = HTTP_CLIENT.newCall(request).execute()) {
-                    final var url = GSON.fromJson(response.body().string(), JsonObject.class).get("message")
-                            .getAsString();
-                    event.getChannel()
-                            .sendMessageEmbeds(
-                                    new EmbedBuilder().setColor(BotUtils.generateRandomPastelColor())
-                                            .setTimestamp(Instant.now()).setImage(url).build())
-                            .queue(msg -> event.getMessage().delete().queue());
-                } catch (final IOException e) {
-                    final var strBuilder = new StringBuilder("```\n");
-                    strBuilder.append(e.getLocalizedMessage() + "\n");
-                    for (final StackTraceElement el : e.getStackTrace()) {
-                        strBuilder.append(el.toString());
-                    }
-                    strBuilder.append("```");
-
-                    event.getChannel().sendMessage(
-                            "There was an issue retrieving hentai. Please report the following error to the bot owner:\n"
-                                    + strBuilder.toString())
-                            .queue(msg -> event.getMessage().delete().queue());
-                }
+                sendHentai(event.getChannel(), event.getMessage());
                 return;
             }
 
             final Set<BaseNSFWCommand> commands = COMMANDS.get(event.getGuild().getIdLong());
             commands.stream().filter(cmd -> cmd.name.equalsIgnoreCase(commandName)).findFirst()
-                    .ifPresent(cmd -> execute(cmd, event.getMessage()));
+                    .ifPresent(cmd -> execute(cmd, event.getChannel(), event.getMessage()));
         }
     }
 }
